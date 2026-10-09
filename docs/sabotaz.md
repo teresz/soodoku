@@ -22,7 +22,11 @@ Wybrane przez teresza spośród: Sabotaż, Wojna o pola, Wyścig duchów, Kooper
   - **Zamazanie**: plansza przeciwnika rozmyta na 4 s.
 - **Pełny kwadrat 3x3** = **obrót planszy przeciwnika o 90°** (animowany; zaznaczenie i notatki obracają się razem z planszą). Obrócone sudoku nadal jest poprawne, więc nic się nie psuje.
 - Jeden ruch zamykający naraz wiersz i kolumnę wysyła dwa ataki.
-- **Zła cyfra** = 3 s blokady wpisywania u siebie (żeby nie opłacało się klepać na ślepo).
+- **Zła cyfra** = kara u siebie, rosnąca z każdym błędem (decyzja teresza, 2026-10-09), żeby nie opłacało się klepać na ślepo:
+  - 1. błąd: 3 s blokady wpisywania,
+  - 2. błąd: 5 s blokady + 3 s rozmycia własnej planszy,
+  - 3. i każdy następny: 5 s blokady + 5 s rozmycia.
+  Licznik nie spada do końca rundy, zeruje się dopiero w rewanżu.
 - **Wygrana**: kto pierwszy poprawnie wypełni planszę. Wyjście z gry albo zerwane połączenie na dłużej = wygrana drugiego.
 
 ## Hamulce
