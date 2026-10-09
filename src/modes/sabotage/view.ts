@@ -2,6 +2,8 @@ import type { Game, MoveResult } from '../../game/game';
 import { makeRng } from '../../core/rng';
 import { t } from '../../i18n';
 import { Room, RoomMsg, joinRoom } from '../../net/room';
+import { currentAccount, onSyncChange } from '../../daily/sync';
+import { cleanEmail } from './matches';
 import {
   AttackKind, AttackQueue, COUNTDOWN_MS, LEVELS, Level, SELF_FREEZE_MS, WALKOVER_MS,
   attacksFor, decideWinner, makeCode, normalizeCode,
@@ -48,6 +50,10 @@ export function createSabotageView(deps: SabotageDeps) {
   let theirWonMs: number | null = null;
   let opp: string | null = null; // peer rywala
   let oppProgress = 0;
+  // Kto jest po drugiej stronie (do statystyk z rywalami). Mail wysyłamy dopiero, gdy rywal też ma konto.
+  let oppAcct = false;
+  let oppEmail: string | null = null;
+  let sentId = false;
   let goneTimer = 0;
   let readyTimer = 0;
   let frozenUntil = 0;
@@ -108,7 +114,7 @@ export function createSabotageView(deps: SabotageDeps) {
     room.onPeers(onPeers);
     if (!host) {
       // Gość puka do gospodarza, aż dostanie start.
-      const knock = () => room?.send({ t: 'ready' });
+      const knock = () => room?.send({ t: 'ready', acct: hasAcct() });
       knock();
       readyTimer = window.setInterval(() => {
         if (phase !== 'waiting') return window.clearInterval(readyTimer);
@@ -131,7 +137,7 @@ export function createSabotageView(deps: SabotageDeps) {
         toast(t('sab.oppGone'), 'warn');
         goneTimer = window.setTimeout(() => { goneTimer = 0; finishRemote(true, 'left'); }, WALKOVER_MS);
       }
-      if (phase === 'waiting' || phase === 'over') { opp = null; drawLobby(); renderHud(); }
+      if (phase === 'waiting' || phase === 'over') { opp = null; oppAcct = false; oppEmail = null; sentId = false; drawLobby(); renderHud(); }
     } else if (opp && others.includes(opp) && goneTimer) {
       window.clearTimeout(goneTimer);
       goneTimer = 0;
@@ -147,10 +153,13 @@ export function createSabotageView(deps: SabotageDeps) {
         if (!host) return;
         if (!opp) opp = from;
         if (from !== opp) return;
+        oppAcct = m.acct === true;
         if (phase === 'waiting') newRound();
         else if (phase === 'countdown' && lastStart) room?.send(lastStart);
+        sendId();
         return;
       case 'rematch':
+        if (m.acct !== undefined) { oppAcct = m.acct === true; sendId(); }
         if (host && phase === 'over') newRound();
         return;
       case 'start': {
@@ -158,10 +167,24 @@ export function createSabotageView(deps: SabotageDeps) {
         const r = Number(m.round), seed = Number(m.seed);
         if (r <= round || !LEVELS.includes(m.level as Level) || !Number.isFinite(seed)) return;
         opp = from;
+        oppAcct = m.acct === true;
         level = m.level as Level;
         beginRound(r, seed);
+        sendId();
         return;
       }
+      case 'acct': // rywal zalogował się już w pokoju (konto wczytuje się chwilę po starcie strony)
+        if (from !== opp) return;
+        oppAcct = true;
+        sendId();
+        return;
+      case 'id':
+        if (from !== opp) return;
+        oppEmail = cleanEmail(m.who);
+        oppAcct = true; // przysłał mail, czyli ma konto: odsyłamy swój
+        sendId();
+        renderHud();
+        return;
     }
     if (Number(m.round) !== round) return;
     switch (m.t) {
@@ -189,9 +212,27 @@ export function createSabotageView(deps: SabotageDeps) {
     }
   }
 
+  const hasAcct = () => !!currentAccount();
+
+  // Konto mogło się wczytać już po wejściu do pokoju: wtedy dajemy rywalowi znać.
+  let announced = false;
+  onSyncChange(() => {
+    if (!room || !opp || !hasAcct()) return;
+    if (!announced) { announced = true; room.send({ t: 'acct' }); }
+    sendId();
+  });
+
+  /** Mój mail do rywala: raz na pokój i tylko, gdy obaj jesteśmy zalogowani. */
+  function sendId() {
+    const me = currentAccount();
+    if (!room || sentId || !oppAcct || !me?.email) return;
+    sentId = true;
+    room.send({ t: 'id', who: me.email });
+  }
+
   function newRound() {
     const r = round + 1, seed = Math.floor(rng() * 2 ** 31);
-    lastStart = { t: 'start', round: r, seed, level };
+    lastStart = { t: 'start', round: r, seed, level, acct: hasAcct() };
     room?.send(lastStart);
     beginRound(r, seed);
   }
@@ -295,12 +336,13 @@ export function createSabotageView(deps: SabotageDeps) {
         <p class="sb-status"><span class="spinner"></span>${t('sab.waitingHost')}</p>`;
     }
     box.innerHTML = `
+      <button class="sheet-x" type="button" aria-label="${t('sheet.close')}" title="${t('sheet.close')}"></button>
       <p class="sheet-label">${t('sab.name')}</p>
       <h2>${phase === 'idle' || phase === 'connecting' ? t('sab.lobby.title') : t('sab.room')}</h2>
       ${error ? `<p class="sb-error">${error}</p>` : ''}
       ${body}
       <button type="button" class="btn-quiet btn-rules-link sb-rules"><span class="ico ico-help"></span><span>${t('new.rules')}</span></button>
-      <button type="button" class="btn-quiet sb-close">${t(phase === 'idle' ? 'new.back' : 'sab.cancel')}</button>`;
+      <button type="button" class="btn-quiet sb-close" data-x>${t(phase === 'idle' ? 'new.back' : 'sab.cancel')}</button>`;
     box.querySelectorAll<HTMLElement>('.sb-lvl').forEach((b) => b.addEventListener('click', () => { level = b.dataset.lvl as Level; drawLobby(); }));
     box.querySelector('.sb-create')?.addEventListener('click', () => void connect(makeCode(rng), true));
     const form = box.querySelector<HTMLFormElement>('.sb-join');
@@ -333,6 +375,10 @@ export function createSabotageView(deps: SabotageDeps) {
     goneTimer = 0;
     phase = 'idle';
     opp = null;
+    oppAcct = false;
+    oppEmail = null;
+    sentId = false;
+    announced = false;
     round = 0;
     queue.clear();
     hud.hidden = true;
@@ -356,7 +402,7 @@ export function createSabotageView(deps: SabotageDeps) {
       s.querySelector('.sb-pct')!.textContent = `${Math.round(p * 100)}%`;
     };
     set('me', t('sab.you'), myProgress());
-    set('opp', t('sab.opp'), oppProgress);
+    set('opp', oppEmail && hasAcct() ? oppEmail.split('@')[0] : t('sab.opp'), oppProgress);
   }
 
   return {
@@ -408,10 +454,12 @@ export function createSabotageView(deps: SabotageDeps) {
     },
     rematch() {
       if (!room || !opp) { toast(t('sab.oppGone'), 'warn'); return false; }
-      if (host) newRound(); else { room.send({ t: 'rematch' }); toast(t('sab.rematchAsked')); }
+      if (host) newRound(); else { room.send({ t: 'rematch', acct: hasAcct() }); toast(t('sab.rematchAsked')); }
       return true;
     },
     leave() { leave(); },
+    /** Mail rywala do statystyk: tylko gdy obaj gramy zalogowani, inaczej null (= gość). */
+    opponentEmail(): string | null { return hasAcct() && oppAcct ? oppEmail : null; },
     get playing() { return inGame() && (phase === 'playing' || phase === 'countdown'); },
     render() {
       const on = inGame();

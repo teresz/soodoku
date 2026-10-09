@@ -22,6 +22,7 @@
 /* pasek postępu: ty kontra rywal */
 .sb-hud { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .sb-side { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 75%, transparent); backdrop-filter: blur(10px); font-size: 12px; font-weight: 700; color: var(--muted); }
+.sb-who { max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sb-bar { height: 6px; border-radius: 99px; background: var(--cell); overflow: hidden; }
 .sb-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width .5s var(--ease); }
 .sb-side.opp .sb-bar i { background: var(--danger); }
