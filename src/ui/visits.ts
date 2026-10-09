@@ -4,9 +4,10 @@ import { locale, num, t } from '../i18n';
 import { addDays, dayKey, parseDay } from '../daily/daily';
 import type { AdminUser, VisitStats } from '../net/visits';
 
-/** 0 min / 42 min / 3 h 05 min / 2 d 4 h */
+/** 0 min / < 1 min / 42 min / 3 h 05 min / 2 d 4 h */
 export function duration(secs: number) {
   const m = Math.floor(secs / 60);
+  if (m === 0 && secs > 0) return '< 1 min';
   if (m < 60) return `${m} min`;
   const h = Math.floor(m / 60);
   if (h < 48) return `${h} h ${String(m % 60).padStart(2, '0')} min`;
@@ -26,7 +27,9 @@ export function renderVisits(s: VisitStats | null): string {
   }).join('');
   const tile = (label: string, c: { visits: number; devices: number; seconds?: number }, cls = '') =>
     `<div class="vs-tile ${cls}"><small>${label}</small><b>${num(Number(c.visits))}</b><span>${t('visits.devices', { n: num(Number(c.devices)) })}</span>`
-    + `<em class="vs-time">⏱ ${duration(Number(c.seconds ?? 0))}</em></div>`;
+    + (c.seconds === undefined // stara visit_stats z page_visits.sql nie zwraca czasu: brak dokładki page_time.sql
+      ? `<em class="vs-time missing">⏱ ${t('visits.noTime')}</em></div>`
+      : `<em class="vs-time">⏱ ${duration(Number(c.seconds))}</em></div>`);
   return `<div class="visits-box">
     <p class="sheet-label">${t('visits.title')}</p>
     <div class="vs-tiles">${tile(t('visits.today'), s.today, 'hot')}${tile(t('visits.total'), s.total)}</div>
