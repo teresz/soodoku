@@ -25,6 +25,7 @@
     <span class="continue-bar"><i id="continue-progress"></i></span>
     <span class="continue-meta" id="continue-meta"></span>
   </button>
+  <div class="daily-card" id="daily-card"></div>
   <p class="section-label" data-i18n="home.modes">Tryby</p>
   <div class="mode-cards" id="mode-cards"></div>
   <div class="home-actions">
@@ -96,6 +97,8 @@
     <h2 id="settings-title" data-i18n="settings.title">Ustawienia</h2>
     <p class="sheet-label" data-i18n="lang.label">Język</p>
     <div class="lang-switch wide" id="lang-settings" role="radiogroup" aria-label="Język" data-i18n-aria="lang.label"></div>
+    <p class="sheet-label" id="account-label" data-i18n="account.title" hidden>Konto</p>
+    <div class="account" id="account-box" hidden></div>
     <p class="sheet-label" data-i18n="settings.colors">Kolory</p>
     <div class="swatches" id="theme-list"></div>
     <p class="sheet-label" data-i18n="settings.appearance">Wygląd</p>
@@ -131,6 +134,14 @@
     <div class="rules-body" id="rules-body"></div>
     <button class="btn-accent" id="btn-rules-ok" type="button" data-i18n="rules.ok">Jasne, gramy</button>
   </div>
+</div>
+
+<div class="overlay" id="sheet-daily" hidden>
+  <div class="sheet daily" role="dialog" aria-modal="true" aria-labelledby="daily-mode"></div>
+</div>
+
+<div class="overlay" id="sheet-calendar" hidden>
+  <div class="sheet calendar" role="dialog" aria-modal="true" aria-labelledby="calendar-title"></div>
 </div>
 
 <div class="overlay" id="sheet-stats" hidden>

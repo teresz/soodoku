@@ -17,6 +17,7 @@
     "vitest": "^2.1.4"
   },
   "dependencies": {
+    "@supabase/auth-js": "^2.117.3",
     "@supabase/realtime-js": "^2.117.3"
   }
 }
