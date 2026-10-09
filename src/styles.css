@@ -75,7 +75,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 :root:not(.motion) .blob, :root:not(.motion) .backlit::before, :root:not(.motion) .hero-mark::before { animation: none; }
 
 .app {
-  position: relative; z-index: 1; margin: 0 auto; padding-inline: 16px; padding-block: calc(14px + env(safe-area-inset-top, 0px)) 28px;
+  position: relative; z-index: 1; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  padding-block: calc(14px + env(safe-area-inset-top, 0px)) calc(28px + env(safe-area-inset-bottom, 0px));
   width: min(100%, 560px, max(352px, calc(100dvh - 250px)));
   display: flex; flex-direction: column; gap: 14px;
 }
@@ -296,7 +297,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Menu startowe */
 .home {
-  position: relative; z-index: 1; margin: 0 auto; width: min(100%, 520px); padding-inline: 16px; padding-block: calc(28px + env(safe-area-inset-top, 0px)) 32px;
+  position: relative; z-index: 1; margin: 0 auto; width: min(100%, 520px); padding-inline: max(16px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  padding-block: calc(28px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; gap: 14px; min-height: 100%;
 }
 .hero { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding-block: 18px 10px; }
@@ -347,7 +349,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Przełącznik języka: dwie flagi. W menu w prawym górnym rogu, w ustawieniach na całą szerokość. */
 .lang-switch { display: flex; gap: 6px; }
-.home > .lang-switch { position: absolute; top: 28px; right: 16px; z-index: 2; }
+.home > .lang-switch { position: absolute; top: calc(28px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 2; }
 .lang-btn {
   display: flex; align-items: center; gap: 7px; padding: 6px 10px 6px 7px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .06em;
   color: var(--muted); background: color-mix(in srgb, var(--surface) 60%, transparent); backdrop-filter: blur(10px);
