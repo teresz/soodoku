@@ -47,3 +47,4 @@ Tryb „Odkryte pola” (`src/modes/clues.ts`, `generateByClues`) liczy trudnoś
 1. Utwórz `src/modes/<tryb>.ts` implementujący `GameMode`.
 2. Dodaj go do `MODES` w `src/modes/index.ts` (zamiast zapowiedzi).
 3. Jeśli tryb zmienia reguły wpisywania, rozszerz `GameMode` o haki i wywołaj je w `Game.place()`.
+4. Niestandardowy tryb (wszystko poza klasycznym sudoku) dostaje arkusz „Jak grać”: `rules: () => rulesSheet(wstęp, sekcje)` z `src/modes/rules.ts`. Sekcje to wiersze legendy (ikona + tytuł + opis), opcjonalny przykład w `html` i lista porad; ikony rysuj tymi samymi klasami co na planszy, a gotowe wspólne (zła cyfra, życia, odznaki) bierz z `RULE_ICONS`. Teksty jako klucze `<tryb>.r.*` w obu słownikach `src/i18n.ts`. Arkusz sam wyskakuje przy pierwszej grze, potem jest pod ? w pasku i „Jak grać?” przy poziomach. Test `tests/rules.test.ts` pilnuje, żeby żaden niestandardowy tryb nie został bez instrukcji.
