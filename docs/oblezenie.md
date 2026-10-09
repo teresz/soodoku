@@ -31,7 +31,7 @@ Wróg wybiera cel losowo z wagami: 6× chętniej kwadrat, w którym gracz ma ter
 
 ## Instrukcja w grze
 
-Arkusz „Jak grać” (legenda potworów, broń, kary, porady) pokazuje się sam przy pierwszej grze w Oblężeniu (zapamiętane w localStorage `kratka.rules.v1`). Potem otwiera go przycisk ? w górnym pasku gry i „Jak grać?” na liście poziomów. Treść daje tryb przez `GameMode.rules()` (`src/modes/siege/rules.ts`), więc inne tryby mogą dostać swoją. Gdy arkusz jest otwarty, szturm i zegar stoją.
+Arkusz „Jak grać” (legenda potworów, broń, kary, porady) pokazuje się sam przy pierwszej grze w Oblężeniu (zapamiętane w localStorage `kratka.rules.v1`). Potem otwiera go przycisk ? w górnym pasku gry i „Jak grać?” na liście poziomów. Treść daje tryb przez `GameMode.rules()` (`src/modes/siege/rules.ts`, na wspólnym `src/modes/rules.ts`); Tetroku, Saperdoku i Sabotaż mają swoje. Gdy arkusz jest otwarty, szturm i zegar stoją.
 
 ## Sterowanie
 

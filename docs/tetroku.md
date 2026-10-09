@@ -90,3 +90,7 @@ Plus: najprostsze do zrobienia. Minus: tetris jest tu tylko przeszkadzajką, a n
 - Interfejs `GameMode` dostaje opcjonalny własny widok gry, a `ui/app.ts` tylko przekierowuje do niego, gdy tryb go ma. Zmiany we wspólnych plikach minimalne.
 - Zapis bieżącej gry i statystyki (rekord punktów) przez istniejący `storage.ts`, z polami specyficznymi dla Tetroku.
 - Testy: generator zawsze daje klocki, które pokrywają puste pola i pasują do rozwiązania; kolejka nigdy nie daje klocka bez miejsca.
+
+## Jak grać
+
+Arkusz „Jak grać” (przykład z dziurą i klockiem, sterowanie, kary, punkty, porady) wyskakuje przy pierwszej grze, potem pod ? w pasku. Kod: `src/modes/tetroku/rules.ts`.

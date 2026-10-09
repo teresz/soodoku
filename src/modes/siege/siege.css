@@ -167,25 +167,11 @@
 .sg-foe.sg-static { position: relative; left: auto; top: auto; transform: none; display: block; transition: none; }
 .sg-wall.sg-static { position: static; transform: none; display: inline-flex; }
 .sg-bolt.sg-static { position: static; display: block; transform: rotate(-20deg); }
-.sr-lead { margin: 0; font-size: 15px; line-height: 1.5; font-weight: 600; }
-.rules-body section { display: flex; flex-direction: column; gap: 2px; }
-.rules-body h3 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; color: var(--muted); }
-.sr-text { margin: 0 0 8px; font-size: 14px; line-height: 1.45; color: var(--muted); }
-.sr-row { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; padding: 6px 0; }
-.sr-row p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
-.sr-row b, .sr-foe b { color: var(--text); font-weight: 800; }
-.sr-icon { display: grid; place-items: center; min-height: 40px; }
 .sr-foes { display: flex; flex-direction: column; gap: 8px; }
 .sr-foe { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; padding: 10px 12px 12px; border-radius: 16px; background: var(--cell); }
-.sr-foe b { display: block; font-size: 14px; }
+.sr-foe b { display: block; font-size: 14px; color: var(--text); font-weight: 800; }
 .sr-foe small { display: block; margin-top: 2px; font-size: 12px; line-height: 1.4; color: var(--muted); }
 .sr-foe-pic { display: grid; place-items: center; height: 56px; }
 .sr-laser i { display: block; width: 48px; height: 7px; border-radius: 99px; background: linear-gradient(90deg, transparent, #fff 25%, #fff 75%, transparent); box-shadow: 0 0 10px 3px var(--accent); }
-.sr-badge { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 14px; line-height: 1; }
-.sr-badge.gold { background: #f5b82e; box-shadow: 0 0 14px rgb(245 184 46 / .8); }
-.sr-badge.bad { background: var(--danger); }
-.sr-cell { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; font-family: var(--f-display); font-size: 18px; color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, var(--cell)); }
 .sr-castles { display: flex; gap: 3px; }
 .sr-castles svg { width: 15px; height: 15px; fill: var(--danger); }
-.sr-tips { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--muted); }
-.sr-tips li + li { margin-top: 4px; }

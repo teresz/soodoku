@@ -1,4 +1,5 @@
 import { t, tk } from '../../i18n';
+import { RULE_ICONS, rulesSheet } from '../rules';
 
 // Instrukcja Oblężenia: arkusz „Jak grać” z legendą potworów. Rysunki to te same elementy co na planszy.
 
@@ -12,43 +13,34 @@ const ICONS = {
   shot: '<span class="sr-shot"><i class="sg-bolt sg-static"></i></span>',
   laser: '<span class="sr-laser"><i></i></span>',
   fortress: '<span class="sr-badge gold">★</span>',
-  wrong: '<span class="sr-cell bad">7</span>',
+  wrong: RULE_ICONS.wrong(),
   fall: '<span class="sr-badge bad">✕</span>',
   lose: `<span class="sr-castles">${castle}${castle}${castle}</span>`,
 };
-
-const row = (icon: string, title: string, text: string) =>
-  `<div class="sr-row"><span class="sr-icon">${icon}</span><p><b>${title}</b> ${text}</p></div>`;
 
 export function siegeRules(): string {
   const foes = [1, 2, 3].map((hp) =>
     `<div class="sr-foe"><span class="sr-foe-pic">${foe(hp)}</span><span><b>${tk(`siege.r.foe${hp}`)}</b><small>${tk(`siege.r.foe${hp}.desc`)}</small></span></div>`,
   ).join('');
-  return `
-    <p class="sr-lead">${t('siege.r.goal')}</p>
-    <section>
-      <h3>${t('siege.r.castleTitle')}</h3>
-      ${row(ICONS.wall, t('siege.r.wallTitle'), t('siege.r.wall'))}
-    </section>
-    <section>
-      <h3>${t('siege.r.foesTitle')}</h3>
-      <p class="sr-text">${t('siege.r.foes')}</p>
-      <div class="sr-foes">${foes}</div>
-    </section>
-    <section>
-      <h3>${t('siege.r.weaponsTitle')}</h3>
-      ${row(ICONS.shot, t('siege.r.shotTitle'), t('siege.r.shot'))}
-      ${row(ICONS.laser, t('siege.r.laserTitle'), t('siege.r.laser'))}
-      ${row(ICONS.fortress, t('siege.r.fortressTitle'), t('siege.r.fortress'))}
-    </section>
-    <section>
-      <h3>${t('siege.r.dangerTitle')}</h3>
-      ${row(ICONS.wrong, t('siege.r.wrongTitle'), t('siege.r.wrong'))}
-      ${row(ICONS.fall, t('siege.r.fallTitle'), t('siege.r.fall'))}
-      ${row(ICONS.lose, t('siege.r.loseTitle'), t('siege.r.lose'))}
-    </section>
-    <section>
-      <h3>${t('siege.r.tipsTitle')}</h3>
-      <ul class="sr-tips"><li>${t('siege.r.tip1')}</li><li>${t('siege.r.tip2')}</li><li>${t('siege.r.tip3')}</li><li>${t('siege.r.tip4')}</li></ul>
-    </section>`;
+  return rulesSheet(t('siege.r.goal'), [
+    { title: t('siege.r.castleTitle'), rows: [{ icon: ICONS.wall, title: t('siege.r.wallTitle'), text: t('siege.r.wall') }] },
+    { title: t('siege.r.foesTitle'), text: t('siege.r.foes'), html: `<div class="sr-foes">${foes}</div>` },
+    {
+      title: t('siege.r.weaponsTitle'),
+      rows: [
+        { icon: ICONS.shot, title: t('siege.r.shotTitle'), text: t('siege.r.shot') },
+        { icon: ICONS.laser, title: t('siege.r.laserTitle'), text: t('siege.r.laser') },
+        { icon: ICONS.fortress, title: t('siege.r.fortressTitle'), text: t('siege.r.fortress') },
+      ],
+    },
+    {
+      title: t('siege.r.dangerTitle'),
+      rows: [
+        { icon: ICONS.wrong, title: t('siege.r.wrongTitle'), text: t('siege.r.wrong') },
+        { icon: ICONS.fall, title: t('siege.r.fallTitle'), text: t('siege.r.fall') },
+        { icon: ICONS.lose, title: t('siege.r.loseTitle'), text: t('siege.r.lose') },
+      ],
+    },
+    { title: t('siege.r.tipsTitle'), tips: [t('siege.r.tip1'), t('siege.r.tip2'), t('siege.r.tip3'), t('siege.r.tip4')] },
+  ]);
 }

@@ -2,6 +2,7 @@ import './saperdoku.css';
 import { t } from '../../i18n';
 import { GameMode } from '../types';
 import { LEVELS, createSaper, levelOf } from './engine';
+import { saperdokuRules } from './rules';
 
 const LEVEL_NAMES = ['lvl.easy', 'lvl.medium', 'lvl.hard', 'lvl.expert', 'lvl.master'] as const;
 
@@ -28,6 +29,7 @@ export const saperdoku: GameMode = {
     lastMines = mines;
     return { puzzle, solution, difficulty, seed };
   },
+  rules: saperdokuRules,
   setup: (state) => {
     state.saper = { mines: lastMines, flags: [], exploded: [], showList: levelOf(state.difficulty).showList };
     lastMines = [];

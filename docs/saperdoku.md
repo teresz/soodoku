@@ -49,3 +49,7 @@ Wspólny limit 3 na grę. Jeśli zaznaczone pole nie jest gotowe: mina zostaje o
 | Mistrz  | 24             | 21   | nie                 |
 
 Rekord to najlepszy czas na poziom, jak w trybach klasycznych.
+
+## Jak grać
+
+Arkusz „Jak grać” (przykład 3×3 z licznikami i flagami, narzędzia, kary, porady) wyskakuje przy pierwszej grze, potem pod ? w pasku. Kod: `src/modes/saperdoku/rules.ts`.

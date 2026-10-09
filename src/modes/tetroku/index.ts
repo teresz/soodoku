@@ -3,6 +3,7 @@ import { makeRng } from '../../core/rng';
 import { t } from '../../i18n';
 import { GameMode } from '../types';
 import { LEVELS, carvePieces, createTetroku, levelOf } from './engine';
+import { tetrokuRules } from './rules';
 
 const LEVEL_NAMES = ['lvl.start', 'lvl.easy', 'lvl.medium', 'lvl.hard', 'lvl.expert', 'lvl.master'] as const;
 
@@ -31,5 +32,6 @@ export const tetroku: GameMode = {
     lastPlan = plan;
     return { puzzle, solution, difficulty, seed };
   },
+  rules: tetrokuRules,
   setup: (state) => { state.tetroku = createTetroku(state, state.difficulty, lastPlan); lastPlan = []; },
 };

@@ -29,3 +29,23 @@
 }
 .mine-list b.off { opacity: .3; text-decoration: line-through; }
 .mine-list[hidden] { display: none; }
+
+/* --- arkusz „Jak grać” --- */
+.sr-mc { position: absolute; top: 3px; right: 4px; font: 800 9px/1 var(--f-body); font-style: normal; color: var(--muted); }
+.sr-mc[data-n="0"] { opacity: .45; }
+.sr-mc[data-n="1"] { color: #2f6fed; }
+.sr-mc[data-n="2"] { color: #1f9d55; }
+.sr-mc[data-n="3"] { color: #e5383b; }
+.sr-cell.sr-flag { font-size: 16px; background: color-mix(in srgb, var(--accent) 16%, var(--cell)); }
+.sr-demo .sr-mini:has(.sr-mc) { --s: 32px; }
+.sr-mini .sr-cell.sr-flag { font-size: 14px; }
+.sr-mini .sr-mc { top: 2px; right: 3px; font-size: 8px; }
+.sr-cell.sr-boom { font-size: 18px; background: color-mix(in srgb, var(--danger) 28%, var(--cell)); }
+.motion .sr-boom { animation: blast 1.6s var(--ease) infinite; }
+.motion .sr-demo .sr-flag { animation: sr-flag 2.4s ease-in-out infinite; }
+@keyframes sr-flag { 0%, 60%, 100% { transform: none; } 70% { transform: rotate(-8deg) scale(1.1); } 80% { transform: rotate(6deg); } }
+.sr-nope { position: relative; }
+.sr-nope::after { content: ''; position: absolute; left: 16%; right: 16%; top: 50%; height: 2.5px; border-radius: 2px; background: var(--danger); transform: rotate(-35deg); }
+.sr-chip { font-weight: 800; font-size: 13px; padding: 5px 9px; border-radius: 999px; background: var(--cell); white-space: nowrap; }
+.mine-list.sr-list { gap: 3px; flex-wrap: nowrap; }
+.mine-list.sr-list b { min-width: 16px; height: 18px; padding: 0 4px; font-size: 11px; }
