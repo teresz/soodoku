@@ -62,6 +62,9 @@ const PL = {
   'theme.coral': 'Koral',
   'theme.iris': 'Irys',
   'theme.lagoon': 'Laguna',
+  'theme.sakura': 'Sakura',
+  'theme.aurora': 'Zorza',
+  'theme.glacier': 'Lodowiec',
   'theme.mono': 'Mono',
 
   'end.solved': 'Rozwiązane',
@@ -470,6 +473,9 @@ const EN: Record<Key, string> = {
   'theme.coral': 'Coral',
   'theme.iris': 'Iris',
   'theme.lagoon': 'Lagoon',
+  'theme.sakura': 'Sakura',
+  'theme.aurora': 'Aurora',
+  'theme.glacier': 'Glacier',
   'theme.mono': 'Mono',
 
   'end.solved': 'Solved',

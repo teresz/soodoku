@@ -15,6 +15,9 @@ export const THEMES: Theme[] = [
   { id: 'coral', name: 'Koral', hue: 12, sat: 30, accent: ['#e8432f', '#ff7a5c'], onAccent: ['#ffffff', '#2a0d07'], glow: ['#ff6b4a', '#ffb23f'] },
   { id: 'iris', name: 'Irys', hue: 268, sat: 30, accent: ['#7a3cf0', '#b28cff'], onAccent: ['#ffffff', '#1a0d33'], glow: ['#9a5bff', '#ff5bd1'] },
   { id: 'lagoon', name: 'Laguna', hue: 186, sat: 30, accent: ['#008f86', '#3ee0cf'], onAccent: ['#ffffff', '#04211f'], glow: ['#16d6c1', '#3b8bff'] },
+  { id: 'sakura', name: 'Sakura', hue: 340, sat: 32, accent: ['#c42a68', '#ff8fbd'], onAccent: ['#ffffff', '#2e0717'], glow: ['#ff9ec7', '#ffcf8a'] },
+  { id: 'aurora', name: 'Zorza', hue: 165, sat: 30, accent: ['#00855f', '#45f5b0'], onAccent: ['#ffffff', '#032619'], glow: ['#2ef5a3', '#8f5bff'] },
+  { id: 'glacier', name: 'Lodowiec', hue: 204, sat: 38, accent: ['#0069a8', '#8fdcff'], onAccent: ['#ffffff', '#06202e'], glow: ['#8fdcff', '#e3f6ff'] },
   { id: 'mono', name: 'Mono', hue: 220, sat: 0, accent: ['#111111', '#f2f2f2'], onAccent: ['#ffffff', '#111111'], glow: ['#9a9a9a', '#d4d4d4'] },
 ];
 

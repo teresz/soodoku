@@ -28,7 +28,7 @@ Uwaga: `npm install` nie działa bezpośrednio w `/mnt/project-files` (brak syml
 - `src/net/` – pokoje multiplayer: Supabase Realtime (broadcast + presence, `config.ts` z publicznym kluczem), a z `?net=local` zamiennik na BroadcastChannel do testów na dwóch kartach.
 - `src/game/` – stan rozgrywki (`game.ts`: wpisywanie, notatki, cofanie, podpowiedzi, błędy) i zapis w localStorage (`storage.ts`: bieżąca gra + statystyki).
 - `src/ui/app.ts` – renderowanie planszy (9 kafli po 9 pól), klawiatura pod planszą i fizyczna, arkusze (nowa gra, ustawienia, wynik, statystyki).
-- `src/ui/themes.ts` – palety kolorów (Wolt, Limonka, Koral, Irys, Laguna, Mono), każda w wersji jasnej i ciemnej; tryb Auto idzie za systemem.
+- `src/ui/themes.ts` – palety kolorów (Wolt, Limonka, Koral, Irys, Laguna, Sakura, Zorza, Lodowiec, Mono), każda w wersji jasnej i ciemnej; tryb Auto idzie za systemem.
 - `src/i18n.ts` – teksty po polsku i angielsku (`t('klucz')`), wybór języka w localStorage, flagi PL/GB w menu i ustawieniach. Stałe teksty w `index.html` mają atrybuty `data-i18n`. Nowy tekst = klucz w obu słownikach (TypeScript pilnuje, żeby angielski miał komplet).
 - `src/ui/settings.ts` – ustawienia gracza w localStorage (motyw, wygląd, sprawdzanie błędów, podświetlenia, sprzątanie notatek, zegar, animacje).
 - `src/styles.css` – jedna kolumna na każdym ekranie, żywe tło z dryfującymi plamami koloru.
