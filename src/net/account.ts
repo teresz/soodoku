@@ -17,13 +17,23 @@ export function accountsAvailable(): boolean {
   try { return /^https?:$/.test(location.protocol) && window.top === window.self; } catch { return false; }
 }
 
+/**
+ * Klucz sesji w localStorage. Przy testach dwóch kart (?net=local) każda karta może mieć własne konto
+ * przez ?konto=A / ?konto=B, bo obie widzą ten sam localStorage.
+ */
+function authKey() {
+  const q = new URLSearchParams(location.search);
+  const tag = q.get('net') === 'local' ? q.get('konto')?.replace(/[^\w-]/g, '') : '';
+  return tag ? `soodoku.auth.${tag}` : 'soodoku.auth';
+}
+
 let client: GoTrueClient | null = null;
 let session: Session | null = null;
 
 const auth = () => client ??= new GoTrueClient({
   url: `${SUPABASE_URL}/auth/v1`,
   headers: { apikey: SUPABASE_ANON_KEY },
-  storageKey: 'soodoku.auth',
+  storageKey: authKey(),
   autoRefreshToken: true,
   persistSession: true,
   detectSessionInUrl: false,
@@ -87,7 +97,7 @@ async function rest(path: string, init: RequestInit = {}) {
     ...init,
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json', ...init.headers },
   });
-  if (!r.ok) throw new Error(`daily_progress ${r.status}`);
+  if (!r.ok) throw new Error(`${path.split('?')[0]} ${r.status}`);
   return r;
 }
 
@@ -101,6 +111,24 @@ export async function upsertRows(rows: ProgressRow[]) {
   await rest('daily_progress?on_conflict=user_id,day', {
     method: 'POST',
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify(rows.map((r) => ({ ...r, user_id: userId }))),
+  });
+}
+
+/** Mecz Sabotażu na koncie (tabela sabotage_matches, SQL w supabase/sabotage_matches.sql). */
+export interface MatchRow { match_id: string; opponent: string | null; won: boolean; ms: number; level: string; played_at: string }
+
+export async function fetchMatches(): Promise<MatchRow[]> {
+  return (await rest('sabotage_matches?select=match_id,opponent,won,ms,level,played_at')).json();
+}
+
+/** Mecz raz zapisany już się nie zmienia, więc powtórka tego samego match_id jest ignorowana. */
+export async function insertMatches(rows: MatchRow[]) {
+  if (!rows.length || !session) return;
+  const userId = session.user.id;
+  await rest('sabotage_matches?on_conflict=user_id,match_id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
     body: JSON.stringify(rows.map((r) => ({ ...r, user_id: userId }))),
   });
 }

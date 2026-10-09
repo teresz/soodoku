@@ -1,6 +1,7 @@
 import { CELLS, PEERS, UNITS, colOf, conflicts, rowOf } from '../core/board';
 import { randomSeed } from '../core/rng';
 import { Game, HINT_LIMIT, MoveResult, SavedGame } from '../game/game';
+import { createGame, warmUpGenerator } from '../game/create';
 import { loadGame, loadStats, recordResult, saveGame } from '../game/storage';
 import { MODES, GameMode, difficultyLabel } from '../modes';
 import { mineCount } from '../modes/saperdoku/engine';
@@ -9,7 +10,8 @@ import { createSiegeView } from '../modes/siege/view';
 import { createSabotageView } from '../modes/sabotage/view';
 import { createDailyView } from '../daily/view';
 import { currentStreak, dayKey, loadProgress, markDone } from '../daily/daily';
-import { onSyncChange, pushDay, startSync } from '../daily/sync';
+import { currentAccount, matchSyncState, onSyncChange, pushDay, pushMatches, startSync } from '../daily/sync';
+import { addMatchRecord, renderRivals } from './rivals';
 import { renderAccountBanner, renderAccountSettings } from './account';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
 import { Settings, loadSettings, saveSettings } from './settings';
@@ -261,13 +263,23 @@ export function startApp(initial: SavedGame | null) {
   const renderTime = () => { $('meta-time').textContent = formatTime(game.state.elapsedMs); };
 
   // --- efekty ---
+  // Bez `void el.offsetWidth`: wymuszony przelicznik układu przy każdym polu (9 na linię, 81 na wygraną)
+  // dawał wyraźne zacięcie na telefonie. Restart tej samej animacji idzie przez dwie klatki, a stary timer już jej nie ucina.
+  const animTimers = new WeakMap<HTMLElement, Map<string, number>>();
   function animate(target: number | HTMLElement, cls: string, delay = 0, duration = 750) {
     const el = typeof target === 'number' ? cells[target].el : target;
-    el.classList.remove(cls);
-    void el.offsetWidth; // restart animacji
-    el.style.setProperty('--d', `${delay}ms`);
-    el.classList.add(cls);
-    window.setTimeout(() => el.classList.remove(cls), duration + delay);
+    let timers = animTimers.get(el);
+    if (!timers) animTimers.set(el, (timers = new Map()));
+    window.clearTimeout(timers.get(cls));
+    const start = () => {
+      el.style.setProperty('--d', `${delay}ms`);
+      el.classList.add(cls);
+      timers!.set(cls, window.setTimeout(() => el.classList.remove(cls), duration + delay));
+    };
+    if (el.classList.contains(cls)) {
+      el.classList.remove(cls);
+      requestAnimationFrame(() => requestAnimationFrame(start));
+    } else start();
   }
 
   function handleResult(i: number, r: MoveResult) {
@@ -362,25 +374,37 @@ export function startApp(initial: SavedGame | null) {
     showScreen('game');
   }
 
+  /** Sabotaż: wynik meczu do statystyk z rywalami (z mailem rywala, gdy obaj są zalogowani). */
+  function recordMatch(won: boolean) {
+    const s = game.state;
+    addMatchRecord({ won, ms: s.elapsedMs, level: s.difficulty, opp: sab.opponentEmail(), owner: currentAccount()?.id ?? null });
+    pushMatches();
+  }
+
   /** Sabotaż: rywal skończył pierwszy, poddał się albo zniknął. */
   function remoteEnd(won: boolean, why: 'faster' | 'resigned' | 'left') {
     const s = game.state;
     if (s.status !== 'playing') return;
     s.status = won ? 'won' : 'lost';
     recordResult(s.modeId, s.difficulty, won, s.elapsedMs);
+    recordMatch(won);
     closeSheets();
     render();
     showEnd(won, t(`sab.end.${why}`));
   }
 
+  let generating = 0;
   function newGame(modeId: string, difficulty: string) {
+    if (generating) return; // drugi klik w poziom, zanim pierwsza plansza gotowa
     closeSheets();
     $('busy').hidden = false;
-    // Daj przeglądarce narysować „Generuję…” zanim zablokujemy ją generatorem.
-    window.setTimeout(() => {
+    const ticket = generating = Date.now();
+    void createGame(modeId, difficulty, randomSeed()).then((g) => {
+      if (generating !== ticket) return;
+      generating = 0;
       $('busy').hidden = true;
-      begin(Game.create(modeId, difficulty, randomSeed()));
-    }, 40);
+      begin(g);
+    });
   }
 
   /** Start świeżej gry (zwykłej albo wyzwania dnia). */
@@ -576,6 +600,7 @@ export function startApp(initial: SavedGame | null) {
       const won = sab.confirmWin();
       if (!won) s.status = 'lost';
       recordResult(s.modeId, s.difficulty, won, s.elapsedMs);
+      recordMatch(won);
       return showEnd(won, t(won ? 'sab.end.won' : 'sab.end.faster'));
     }
     const { stats, newBest } = recordResult(s.modeId, s.difficulty, true, s.elapsedMs, s.tetroku?.score);
@@ -599,11 +624,13 @@ export function startApp(initial: SavedGame | null) {
     const s = game.state;
     const counted = !s.unlimited; // po „graj dalej bez limitu” przegrana już się policzyła
     const score = s.tetroku?.score;
-    if (isSab()) sab.resign();
+    const wasSab = isSab();
+    if (wasSab) sab.resign();
     if (!game.resign()) return;
     closeSheets();
     paused = false;
     if (counted) recordResult(s.modeId, s.difficulty, false, s.elapsedMs, score);
+    if (wasSab) recordMatch(false);
     persist();
     render();
     for (let j = 0; j < CELLS; j++) if (!s.puzzle[j]) animate(j, 'pop', (rowOf(j) + colOf(j)) * 20, 400);
@@ -688,6 +715,10 @@ export function startApp(initial: SavedGame | null) {
       }).join('');
       return `<p class="sheet-label">${m.name} · ${m.ladder}</p><table class="stats-table"><thead><tr><th>${t('stats.level')}</th><th>${t('stats.played')}</th><th>${t('stats.won')}</th><th>%</th><th>${t('stats.best')}</th></tr></thead><tbody>${rows}</tbody></table>`;
     }).join('');
+    // Multiplayer: bilans z każdym rywalem (tylko tam, gdzie jest Sabotaż).
+    if (MODES.some((m) => m.id === 'sabotage' && m.available)) {
+      $('stats-body').insertAdjacentHTML('afterbegin', renderRivals(currentAccount(), matchSyncState()));
+    }
     $('sheet-stats').hidden = false;
   }
 
@@ -714,16 +745,38 @@ export function startApp(initial: SavedGame | null) {
   $('home-settings').addEventListener('click', openSettings);
   $('btn-settings').addEventListener('click', openSettings);
   document.querySelectorAll<HTMLElement>('[data-close]').forEach((b) => b.addEventListener('click', closeSheets));
+
+  /**
+   * Zamyka arkusz tak jak jego X (i Esc): „Jak grać” zamyka tylko siebie, koniec gry wraca do menu,
+   * arkusz z własnym przyciskiem wyjścia (`data-x`, np. lobby Sabotażu opuszcza pokój) klika go, reszta po prostu się chowa.
+   */
+  function closeOverlay(o: HTMLElement) {
+    if (o.id === 'sheet-rules') return closeRules();
+    if (o.id === 'sheet-end') { closeSheets(); showScreen('home'); return; }
+    const own = o.querySelector<HTMLElement>('[data-x]');
+    if (own) own.click(); else closeSheets();
+  }
+  /** Najwyższy otwarty arkusz: „Jak grać” leży nad innymi. */
+  const topOverlay = () => {
+    const open = [...document.querySelectorAll<HTMLElement>('.overlay:not([hidden])')];
+    return open.find((o) => o.id === 'sheet-rules') ?? open[open.length - 1] ?? null;
+  };
+  document.addEventListener('click', (e) => {
+    const x = (e.target as Element).closest?.('.sheet-x');
+    const o = x?.closest<HTMLElement>('.overlay');
+    if (o) closeOverlay(o);
+  });
   document.querySelectorAll<HTMLElement>('.overlay').forEach((o) =>
     o.addEventListener('click', (e) => {
-      if (e.target !== o || o.id === 'sheet-end') return;
-      if (o.id === 'sheet-rules') closeRules(); else closeSheets();
+      // Koniec gry nie znika od przypadkowego tapnięcia obok; wychodzi się iksem albo przyciskiem.
+      if (e.target === o && o.id !== 'sheet-end') closeOverlay(o);
     }));
 
   // --- klawiatura ---
   document.addEventListener('keydown', (e) => {
-    if (document.querySelector('.overlay:not([hidden])')) {
-      if (e.key === 'Escape') { if (!$('sheet-rules').hidden) closeRules(); else closeSheets(); }
+    const top = topOverlay();
+    if (top) {
+      if (e.key === 'Escape') closeOverlay(top);
       return;
     }
     if (screen !== 'game') return;
@@ -751,12 +804,18 @@ export function startApp(initial: SavedGame | null) {
     }
   });
 
-  // Światło za planszą lekko idzie za kursorem/palcem.
+  // Światło za planszą lekko idzie za myszką. Raz na klatkę i tylko na podświetleniu: zmienna na <html>
+  // przeliczała style całej strony przy każdym ruchu, a na telefonie (przeciąganie klocków) tylko by przeszkadzała.
+  const backlit = document.querySelector<HTMLElement>('.backlit')!;
+  let glowAt: { x: number; y: number } | null = null;
   window.addEventListener('pointermove', (e) => {
-    if (!settings.motion) return;
-    const root = document.documentElement.style;
-    root.setProperty('--mx', ((e.clientX / innerWidth) - 0.5).toFixed(3));
-    root.setProperty('--my', ((e.clientY / innerHeight) - 0.5).toFixed(3));
+    if (!settings.motion || e.pointerType !== 'mouse' || screen !== 'game') return;
+    if (!glowAt) requestAnimationFrame(() => {
+      backlit.style.setProperty('--mx', (glowAt!.x / innerWidth - 0.5).toFixed(2));
+      backlit.style.setProperty('--my', (glowAt!.y / innerHeight - 0.5).toFixed(2));
+      glowAt = null;
+    });
+    glowAt = { x: e.clientX, y: e.clientY };
   }, { passive: true });
 
   // --- zegar ---
@@ -807,12 +866,14 @@ export function startApp(initial: SavedGame | null) {
   // Konto (opcjonalne, mail + hasło): po zalogowaniu postęp wyzwań się synchronizuje, więc odświeżamy, co widać.
   onSyncChange(() => {
     if (!$('sheet-settings').hidden) renderAccountSettings($('account-label'), $('account-box'), renderSettings);
+    if (!$('sheet-stats').hidden) openStats();
     daily.refresh();
     if (screen === 'home') renderHome();
   });
   startSync();
 
   showScreen('home');
+  window.setTimeout(warmUpGenerator, 1200);
   // Link z zaproszeniem (?pokoj=KOD) od razu otwiera pokój Sabotażu.
   const invite = new URLSearchParams(location.search).get('pokoj');
   const sabMode = MODES.find((m) => m.id === 'sabotage');

@@ -1,6 +1,7 @@
 // Synchronizacja postępu wyzwań z kontem (gdy gracz się zalogował). Źródłem prawdy zostaje localStorage:
 // po zalogowaniu łączymy lokalne dni z tymi z serwera i dosyłamy, czego serwer nie ma albo ma gorsze.
-import { Account, ProgressRow, accountsAvailable, fetchRows, upsertRows, watchAccount } from '../net/account';
+import { Account, ProgressRow, accountsAvailable, fetchMatches, fetchRows, insertMatches, upsertRows, watchAccount } from '../net/account';
+import { loadMatches, mergeMatches, saveMatches, toMatchRow } from '../modes/sabotage/matches';
 import { DailyProgress, DayRecord, loadProgress, mergeProgress, saveProgress } from './daily';
 
 export type SyncState = 'off' | 'syncing' | 'ok' | 'error';
@@ -32,15 +33,54 @@ export const onSyncChange = (fn: () => void) => { listeners.push(fn); };
 
 async function syncAll() {
   set('syncing');
+  // Mecze osobno: brak tabeli sabotage_matches (SQL jeszcze nie puszczony) nie może psuć streaka.
+  const matches = syncMatches();
   try {
     const remote = fromRows(await fetchRows());
     const { merged, upload } = plan(loadProgress(), remote);
     saveProgress(merged);
     await upsertRows(upload);
+    await matches;
     set('ok');
   } catch {
     set('error'); // spróbujemy przy następnym starcie albo zapisie; lokalny postęp jest bezpieczny
   }
+}
+
+// --- mecze Sabotażu ---
+let matchState: 'off' | 'ok' | 'error' = 'off';
+export const matchSyncState = () => (account ? matchState : 'off');
+
+async function syncMatches() {
+  const owner = account?.id;
+  if (!owner) return;
+  try {
+    const remote = await fetchMatches();
+    const { merged, upload } = mergeMatches(loadMatches(), owner, remote); // lokalne czytamy dopiero po odpowiedzi serwera
+    saveMatches(merged);
+    if (upload.length) {
+      await insertMatches(upload.map(toMatchRow));
+      const sent = new Set(upload.map((m) => m.id));
+      saveMatches(loadMatches().map((m) => (m.owner === owner && sent.has(m.id) ? { ...m, synced: true } : m)));
+    }
+    matchState = 'ok';
+  } catch {
+    matchState = 'error';
+  }
+  listeners.forEach((f) => f());
+}
+
+/** Po meczu: dosyłamy niewysłane mecze tego konta (zwykle ten jeden). */
+export function pushMatches() {
+  const owner = account?.id;
+  if (!owner) return;
+  const todo = loadMatches().filter((m) => m.owner === owner && !m.synced);
+  if (!todo.length) return;
+  const sent = new Set(todo.map((m) => m.id));
+  insertMatches(todo.map(toMatchRow)).then(() => {
+    saveMatches(loadMatches().map((m) => (m.owner === owner && sent.has(m.id) ? { ...m, synced: true } : m)));
+    matchState = 'ok';
+  }, () => { matchState = 'error'; }).finally(() => listeners.forEach((f) => f()));
 }
 
 /** Start: słuchamy konta i po każdym zalogowaniu robimy pełną synchronizację. */

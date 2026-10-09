@@ -1,19 +1,19 @@
 /* Wyzwanie dnia: karta w menu (obracająca się poświata na ramce, płomień streaka), arkusz z kartką z kalendarza i kalendarz z łańcuchem dni. */
-@property --dspin { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 
 .daily-card {
-  position: relative; isolation: isolate; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 26px;
-  background: color-mix(in srgb, var(--surface) 86%, transparent); backdrop-filter: blur(16px);
+  position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 26px;
   box-shadow: 0 26px 50px -30px var(--accent);
 }
+/* Ramka: pod kartą kręci się duży kolorowy kwadrat, a ::after przykrywa go wszędzie poza 2 px brzegu.
+   Obrót robi karta graficzna (rotate), bez przemalowywania gradientu co klatkę. */
 .daily-card::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 2px;
-  background: conic-gradient(from var(--dspin), var(--glow-a), var(--accent), #ff9a3c, var(--glow-b), var(--glow-a));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: dspin 6s linear infinite;
+  content: ""; position: absolute; z-index: -2; left: 50%; top: 50%; width: 150%; aspect-ratio: 1; translate: -50% -50%;
+  background: conic-gradient(var(--glow-a), var(--accent), #ff9a3c, var(--glow-b), var(--glow-a));
+  animation: glow-spin 6s linear infinite;
 }
-.daily-card.st-onTime::before { background: conic-gradient(from var(--dspin), #ffb648, #ff6a3d, #ffd76a, #ffb648); }
-@keyframes dspin { to { --dspin: 360deg; } }
+.daily-card::after { content: ""; position: absolute; z-index: -1; inset: 2px; border-radius: 24px; background: var(--surface); }
+.daily-card.st-onTime::before { background: conic-gradient(#ffb648, #ff6a3d, #ffd76a, #ffb648); }
+:root:not(.motion) .daily-card::before { animation: none; }
 
 .dc-main { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; text-align: left; color: inherit; transition: transform .25s var(--ease); }
 .dc-main:active { transform: scale(.98); }

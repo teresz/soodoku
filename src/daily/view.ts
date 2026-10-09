@@ -1,6 +1,7 @@
 // Wyzwanie dnia w interfejsie: karta w menu, arkusz z notatką „dlaczego to wyzwanie” i kalendarz ze streakiem.
 import './daily.css';
 import { Game } from '../game/game';
+import { createGame } from '../game/create';
 import { difficultyLabel, getMode } from '../modes';
 import { getLang, locale, t, tk } from '../i18n';
 import {
@@ -85,12 +86,13 @@ export function createDailyView(deps: DailyDeps) {
     deps.closeSheets();
     deps.busy(true);
     // Daj przeglądarce narysować „Generuję…”, zanim zablokujemy ją generatorem.
-    window.setTimeout(() => {
-      pending = Game.create(ch.modeId, ch.difficulty, ch.seed);
-      pending.state.daily = { day, mod: ch.mod };
+    void createGame(ch.modeId, ch.difficulty, ch.seed).then((g) => {
       deps.busy(false);
-      if (openDayKey === day) renderDay(ch, pending);
-    }, 40);
+      if (openDayKey !== day) return;
+      pending = g;
+      pending.state.daily = { day, mod: ch.mod };
+      renderDay(ch, pending);
+    });
   }
 
   function renderDay(ch: Challenge, g: Game) {
@@ -113,6 +115,7 @@ export function createDailyView(deps: DailyDeps) {
     const box = sheet.querySelector('.sheet') as HTMLElement;
     box.className = `sheet daily st-${st}`;
     box.innerHTML = `
+      <button class="sheet-x" type="button" aria-label="${t('sheet.close')}" title="${t('sheet.close')}"></button>
       <div class="dl-head">
         <div class="dl-page" aria-hidden="true"><small>${esc(fmt(day, { month: 'short' }))}</small><b>${parseDay(day).getDate()}</b><span>${esc(fmt(day, { weekday: 'short' }))}</span></div>
         <div class="dl-titles">
@@ -133,7 +136,7 @@ export function createDailyView(deps: DailyDeps) {
       <button class="btn-accent" type="button" data-act="go">${t(live ? 'daily.continue' : rec ? 'daily.replay' : st === 'missed' || st === 'today' ? 'daily.start' : 'daily.retry')}</button>
       <div class="dl-row">
         <button class="btn-quiet" type="button" data-act="calendar">${t('daily.calendar')}</button>
-        <button class="btn-quiet" type="button" data-act="back">${t('daily.back')}</button>
+        <button class="btn-quiet" type="button" data-act="back" data-x>${t('daily.back')}</button>
       </div>`;
     box.querySelector('[data-act="go"]')!.addEventListener('click', () => {
       sheet.hidden = true;
@@ -186,6 +189,7 @@ export function createDailyView(deps: DailyDeps) {
     const box = $('sheet-calendar').querySelector('.sheet') as HTMLElement;
     const streak = currentStreak(p, now);
     box.innerHTML = `
+      <button class="sheet-x" type="button" aria-label="${t('sheet.close')}" title="${t('sheet.close')}"></button>
       <h2 id="calendar-title">${t('daily.calTitle')}</h2>
       <div class="cal-stats">
         <div class="cs-streak${streak ? ' hot' : ''}"><i class="flame" aria-hidden="true">🔥</i><b>${streak}</b><small>${t('daily.streak')}</small></div>

@@ -63,6 +63,8 @@ export function createTetrokuView(deps: TetrokuDeps) {
   let drag: {
     piece: Piece; pointerId: number; x0: number; y0: number; moved: boolean; touch: boolean;
     float?: HTMLElement; tile: number; overHold: boolean;
+    /** Prostokąty pól i schowka z chwili, gdy klocek ruszył: w trakcie przeciągania nic się pod nim nie przesuwa. */
+    rects?: DOMRect[]; holdRect?: DOMRect | null; at?: { x: number; y: number };
   } | null = null;
   let hintTimer = 0;
 
@@ -248,37 +250,55 @@ export function createTetrokuView(deps: TetrokuDeps) {
   }
 
   /** Pole planszy pod punktem (x, y), albo -1. */
-  function cellAt(x: number, y: number) {
+  function cellAt(rects: DOMRect[], x: number, y: number) {
     for (let i = 0; i < CELLS; i++) {
-      const r = deps.cells[i].el.getBoundingClientRect();
+      const r = rects[i];
       if (x >= r.left - 1 && x <= r.right + 1 && y >= r.top - 1 && y <= r.bottom + 1) return i;
     }
     return -1;
   }
 
-  window.addEventListener('pointermove', (e) => {
-    if (!drag || e.pointerId !== drag.pointerId) return;
-    if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 7) return;
-    if (!drag.moved) { drag.moved = true; buildFloat(); renderTray(); }
+  // Ruch palca obsługujemy raz na klatkę i bez czytania układu strony przy każdym zdarzeniu
+  // (wcześniej 81 × getBoundingClientRect przeplatane z zapisami = zacinanie na telefonie).
+  let moveQueued = false;
+  function dragMove() {
+    moveQueued = false;
+    if (!drag?.at) return;
+    const { x, y } = drag.at;
+    if (!drag.moved) {
+      drag.moved = true;
+      buildFloat();
+      renderTray();
+      drag.rects = deps.cells.map((c) => c.el.getBoundingClientRect());
+      drag.holdRect = holdEl.hidden ? null : holdEl.getBoundingClientRect();
+    }
     const f = drag.float!;
     const p = drag.piece;
     const w = Math.max(...p.cells.map((q) => q.c)) + 1, h = Math.max(...p.cells.map((q) => q.r)) + 1;
     const step = drag.tile * 1.06;
     // Na dotyku klocek wisi nad palcem, żeby go było widać.
-    const left = e.clientX - (w * step) / 2;
-    const top = e.clientY - (h * step) / 2 - (drag.touch ? h * step / 2 + drag.tile * 1.1 : 0);
+    const left = x - (w * step) / 2;
+    const top = y - (h * step) / 2 - (drag.touch ? h * step / 2 + drag.tile * 1.1 : 0);
     f.style.transform = `translate(${left}px, ${top}px)`;
-    const hb = holdEl.getBoundingClientRect();
-    drag.overHold = !holdEl.hidden && e.clientX >= hb.left && e.clientX <= hb.right && e.clientY >= hb.top && e.clientY <= hb.bottom;
+    const hb = drag.holdRect;
+    drag.overHold = !!hb && x >= hb.left && x <= hb.right && y >= hb.top && y <= hb.bottom;
     holdEl.classList.toggle('over', drag.overHold);
     // Kotwica: środek pierwszego pola klocka.
     const q0 = p.cells[0];
-    const i = cellAt(left + (q0.c + 0.5) * step, top + (q0.r + 0.5) * step);
+    const i = cellAt(drag.rects!, left + (q0.c + 0.5) * step, top + (q0.r + 0.5) * step);
     paintGhost(i < 0 || drag.overHold ? null : { piece: p, cells: p.cells, r: rowOf(i) - q0.r, c: colOf(i) - q0.c });
+  }
+
+  window.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 7) return;
+    drag.at = { x: e.clientX, y: e.clientY };
+    if (!moveQueued) { moveQueued = true; requestAnimationFrame(dragMove); }
   });
 
   const endDrag = (e: PointerEvent, cancel = false) => {
     if (!drag || e.pointerId !== drag.pointerId) return;
+    if (moveQueued && !cancel) dragMove(); // ostatni ruch palca, zanim przyszła klatka
     const d = drag;
     drag = null;
     d.float?.remove();

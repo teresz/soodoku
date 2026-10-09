@@ -30,3 +30,12 @@ Wybrane przez teresza spośród: Sabotaż, Wojna o pola, Wyścig duchów, Kooper
 - Ataki trafiają do kolejki u ofiary i odpalają się po kolei, nie wszystkie naraz.
 - Dwa obroty pod rząd nie wchodzą: po obrocie 10 s ochrony przed kolejnym obrotem (proste ataki dalej działają).
 - Podpowiedzi wyłączone w multiplayerze (do potwierdzenia).
+
+## Statystyki z rywalami
+
+- W Statystykach na górze jest sekcja **Sabotaż · rywale**: karta na każdego przeciwnika z bilansem (wygrane:porażki), procentem wygranych i datą ostatniego meczu, nad nimi bilans wszystkich meczów.
+- Przeciwnik ma nazwę z maila tylko wtedy, gdy **obaj gracze są zalogowani**. Telefon wysyła swój mail do rywala dopiero, gdy rywal zgłosił, że też ma konto. Mecze z kimś bez konta (albo rozegrane bez logowania) lądują zbiorczo pod „Gość”.
+- Zalogowanemu mecze zapisują się też na koncie (tabela `sabotage_matches`, SQL w `supabase/sabotage_matches.sql`), więc wracają po zmianie telefonu. Bez konta siedzą tylko w telefonie. Mecze rozegrane bez logowania nie przechodzą na konto po zalogowaniu (i tak nie mają maila rywala).
+- W trakcie gry pasek rywala pokazuje jego nazwę (część maila przed @), jeśli obaj są zalogowani.
+- Mail rywala podaje jego własny telefon, serwer go nie sprawdza. Ktoś z przerobioną grą mógłby się podpisać cudzym mailem; przy statystykach dla zabawy to nie boli.
+- Kod: `src/modes/sabotage/matches.ts` (zapis, łączenie z serwerem, bilans), `src/ui/rivals.ts` (karty), wymiana maili w `src/modes/sabotage/view.ts` (wiadomość `id`).

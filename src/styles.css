@@ -57,19 +57,22 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @keyframes drift2 { 40% { transform: translate(-8vmax, -20vmax) scale(1.15); } to { transform: translate(-24vmax, -8vmax) scale(.9); } }
 @keyframes drift3 { 30% { transform: translate(-18vmax, 6vmax) scale(1.2); } 70% { transform: translate(-36vmax, -22vmax) scale(.85); } to { transform: translate(-10vmax, -30vmax) scale(1.35); } }
 
-/* Podświetlenie zza planszy: obracający się, rozmyty pierścień kolorów, lekko idzie za kursorem */
-@property --spin { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+/* Podświetlenie zza planszy: obracający się, rozmyty pierścień kolorów, lekko idzie za kursorem.
+   Kręci się sam element (rotate/scale/translate), a nie kąt gradientu: to liczy karta graficzna, bez przemalowywania co klatkę. */
 .backlit { position: relative; isolation: isolate; }
 .backlit::before {
   content: ""; position: absolute; inset: 4%; z-index: -1; border-radius: 50%;
-  background: conic-gradient(from var(--spin), var(--glow-a), var(--accent), var(--glow-b), var(--glow-a));
+  background: conic-gradient(var(--glow-a), var(--accent), var(--glow-b), var(--glow-a));
   filter: blur(48px); opacity: calc(var(--glow-alpha) * 2.4);
-  transform: translate(calc(var(--mx, 0) * 40px), calc(var(--my, 0) * 40px));
-  transition: transform .8s ease-out;
-  animation: spin 9s linear infinite, breathe 6s ease-in-out infinite alternate;
+  translate: calc(var(--mx, 0) * 40px) calc(var(--my, 0) * 40px);
+  transition: translate .8s ease-out;
+ 
+  animation: glow-spin 9s linear infinite, breathe 6s ease-in-out infinite alternate;
 }
-@keyframes spin { to { --spin: 360deg; } }
-@keyframes breathe { from { inset: 8%; } to { inset: -2%; } }
+@keyframes glow-spin { to { rotate: 360deg; } }
+@keyframes breathe { from { scale: .9; } to { scale: 1.12; } }
+/* Bez animacji w ustawieniach tło też stoi. */
+:root:not(.motion) .blob, :root:not(.motion) .backlit::before, :root:not(.motion) .hero-mark::before { animation: none; }
 
 .app {
   position: relative; z-index: 1; margin: 0 auto; padding-inline: 16px; padding-block: 14px 28px;
@@ -212,6 +215,21 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (min-width: 600px) { .overlay { align-items: center; } }
 .sheet { width: 100%; max-width: 440px; max-height: 100%; overflow: auto; background: var(--surface); border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .45); animation: rise .35s var(--ease); }
 @keyframes rise { from { transform: translateY(24px) scale(.98); opacity: 0; } }
+/* X w rogu każdego arkusza. Przyklejony do góry, więc zostaje pod palcem także w długich arkuszach (Ustawienia, Jak grać). */
+.sheet-x {
+  position: sticky; top: 0; z-index: 3; align-self: flex-end; flex-shrink: 0;
+  width: 38px; height: 38px; margin: -8px -8px -48px 0; border-radius: 50%;
+  display: grid; place-items: center; color: var(--muted);
+  background: var(--cell); box-shadow: 0 0 0 4px var(--surface), 0 6px 16px -8px rgba(0, 0, 0, .35);
+  transition: background-color .2s, color .2s, transform .25s var(--ease);
+}
+.sheet-x::before, .sheet-x::after { content: ""; grid-area: 1 / 1; width: 16px; height: 2.5px; border-radius: 2px; background: currentColor; rotate: 45deg; }
+.sheet-x::after { rotate: -45deg; }
+.sheet-x:hover { background: var(--cell-given); color: var(--text); transform: rotate(90deg); }
+.sheet-x:active { transform: scale(.9); }
+/* Tytuły nie wchodzą pod X. */
+.sheet > .sheet-x + *, .sheet > .sheet-x + .sheet-label + h2 { padding-right: 40px; }
+.end > .sheet-x ~ h2 { padding-inline: 40px; }
 .sheet h2 { font-family: var(--f-display); font-weight: 400; font-size: 26px; margin: 0 0 4px; letter-spacing: -.04em; text-wrap: balance; }
 .sheet-label { margin: 8px 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; color: var(--muted); }
 .modes { display: flex; flex-direction: column; gap: 6px; }
@@ -283,7 +301,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 }
 .hero { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding-block: 18px 10px; }
 .hero-mark { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(3, 28px); gap: 5px; margin-bottom: 14px; }
-.hero-mark::before { content: ""; position: absolute; inset: -30px; z-index: -1; border-radius: 50%; background: conic-gradient(from var(--spin), var(--glow-a), var(--accent), var(--glow-b), var(--glow-a)); filter: blur(30px); opacity: calc(var(--glow-alpha) * 2); animation: spin 7s linear infinite; }
+.hero-mark::before { content: ""; position: absolute; inset: -30px; z-index: -1; border-radius: 50%; background: conic-gradient(var(--glow-a), var(--accent), var(--glow-b), var(--glow-a)); filter: blur(30px); opacity: calc(var(--glow-alpha) * 2); animation: glow-spin 7s linear infinite; }
 .hero-mark i { width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, var(--text) 88%, transparent); transition: background-color .4s, transform .5s var(--ease), border-radius .5s; }
 .hero-mark i.on { background: var(--accent); transform: scale(1.12) rotate(8deg); border-radius: 50%; }
 .hero-title { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: clamp(54px, 17vw, 84px); letter-spacing: -.06em; line-height: .9; }
@@ -346,3 +364,9 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sheet.rules { max-width: 480px; }
 .sheet.rules .sheet-label { margin: 0; }
 .rules-body { display: flex; flex-direction: column; gap: 16px; margin-bottom: 6px; }
+
+/* Telefony: rozmycie tła pod małymi kafelkami liczy się od nowa w każdej klatce, bo plamy w tle dryfują.
+   Na słabszym telefonie to zjadało płynność, a pod półprzezroczystym kolorem i tak go prawie nie widać. */
+@media (hover: none) {
+  html :is(.chip, .key, .mode-card, .home-btn, .lang-btn, .tet-slot, .sb-side, .sg-banner, .tet-pop) { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
