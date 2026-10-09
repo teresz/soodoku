@@ -4,7 +4,9 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const html = readFileSync('dist/index.html', 'utf8');
 const head = /<head>([\s\S]*?)<\/head>/i.exec(html)[1]
-  .replace(/<meta[^>]*>\s*/gi, '');
+  .replace(/<meta[^>]*>\s*/gi, '')
+  // Manifest i ikony leżą obok strony na Pages; w Artifakcie ich nie ma.
+  .replace(/<link rel="(?:manifest|icon|apple-touch-icon)"[^>]*>\s*/gi, '');
 const body = /<body>([\s\S]*?)<\/body>/i.exec(html)[1];
 // Skrypt modułowy musi iść po treści, a nie w <head>, żeby znalazł elementy DOM.
 const scripts = [];

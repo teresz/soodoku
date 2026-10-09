@@ -75,7 +75,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 :root:not(.motion) .blob, :root:not(.motion) .backlit::before, :root:not(.motion) .hero-mark::before { animation: none; }
 
 .app {
-  position: relative; z-index: 1; margin: 0 auto; padding-inline: 16px; padding-block: 14px 28px;
+  position: relative; z-index: 1; margin: 0 auto; padding-inline: 16px; padding-block: calc(14px + env(safe-area-inset-top, 0px)) 28px;
   width: min(100%, 560px, max(352px, calc(100dvh - 250px)));
   display: flex; flex-direction: column; gap: 14px;
 }
@@ -211,7 +211,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (hover: hover) and (pointer: fine) { .keys-help { display: block; } }
 
 /* Arkusze */
-.overlay { position: fixed; inset: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(6px); display: flex; align-items: flex-end; justify-content: center; padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+.overlay { position: fixed; inset: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(6px); display: flex; align-items: flex-end; justify-content: center; padding: 12px; padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 600px) { .overlay { align-items: center; } }
 .sheet { width: 100%; max-width: 440px; max-height: 100%; overflow: auto; background: var(--surface); border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .45); animation: rise .35s var(--ease); }
 @keyframes rise { from { transform: translateY(24px) scale(.98); opacity: 0; } }
@@ -296,7 +296,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Menu startowe */
 .home {
-  position: relative; z-index: 1; margin: 0 auto; width: min(100%, 520px); padding-inline: 16px; padding-block: 28px 32px;
+  position: relative; z-index: 1; margin: 0 auto; width: min(100%, 520px); padding-inline: 16px; padding-block: calc(28px + env(safe-area-inset-top, 0px)) 32px;
   display: flex; flex-direction: column; gap: 14px; min-height: 100%;
 }
 .hero { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding-block: 18px 10px; }
