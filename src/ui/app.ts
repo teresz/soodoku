@@ -498,7 +498,7 @@ export function startApp(initial: SavedGame | null) {
 
   function openNew(m: GameMode) {
     if (!m.available) return;
-    if (m.id === 'sabotage') { closeSheets(); sab.openLobby(() => openRules(m)); return; }
+    if (m.id === 'sabotage') { closeSheets(); openSabLobby(m); return; }
     $('new-title').textContent = m.name;
     $('new-title').dataset.mode = m.id;
     $('new-sub').textContent = m.tagline;
@@ -518,6 +518,12 @@ export function startApp(initial: SavedGame | null) {
     });
     $('btn-new-rules').hidden = !m.rules;
     $('sheet-new').hidden = false;
+  }
+
+  /** Lobby Sabotażu; przy pierwszym wejściu od razu „Jak grać” nad nim (w meczu już nie, bo zegar leci). */
+  function openSabLobby(m: GameMode, invite?: string) {
+    sab.openLobby(() => openRules(m), invite);
+    if (m.rules && !rulesSeen().includes(m.id)) openRules(m);
   }
 
   // --- arkusz „Jak grać” (leży nad innymi arkuszami i zamyka tylko siebie) ---
@@ -891,6 +897,6 @@ export function startApp(initial: SavedGame | null) {
   // Link z zaproszeniem (?pokoj=KOD) od razu otwiera pokój Sabotażu.
   const invite = new URLSearchParams(location.search).get('pokoj');
   const sabMode = MODES.find((m) => m.id === 'sabotage');
-  if (invite && sabMode) sab.openLobby(() => openRules(sabMode), invite);
+  if (invite && sabMode) openSabLobby(sabMode, invite);
   return { snapshot: () => game.state };
 }
