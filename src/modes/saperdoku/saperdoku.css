@@ -1,0 +1,31 @@
+/* Saperdoku: liczniki min w rogu pól, flagi, wybuchy i lista cyfr spod min. */
+.cell .mc {
+  position: absolute; top: 5%; right: 8%; font-family: var(--f-body); font-size: 2.4cqw; font-weight: 800;
+  line-height: 1; pointer-events: none; font-variant-numeric: tabular-nums; color: var(--muted);
+}
+/* Kolory jak w klasycznym saperze; 0 ledwo widoczne. */
+.cell .mc[data-n="0"] { opacity: .35; }
+.cell .mc[data-n="1"] { color: #2f6fed; }
+.cell .mc[data-n="2"] { color: #1f9d55; }
+.cell .mc[data-n="3"] { color: #e5383b; }
+.cell .mc[data-n="4"] { color: #6c3fd1; }
+.cell .mc[data-n="5"] { color: #b5541c; }
+.cell .mc[data-n="6"], .cell .mc[data-n="7"], .cell .mc[data-n="8"] { color: #0f8c8c; }
+.cell.sel .mc { color: var(--on-accent) !important; opacity: .9; }
+
+.cell.flag { background: color-mix(in srgb, var(--accent) 16%, var(--cell)); }
+.cell.flag .val::before { content: "🚩"; font-size: 4.4cqw; }
+.cell.boom { background: color-mix(in srgb, var(--danger) 28%, var(--cell)); }
+.cell.boom .val::before { content: "💥"; }
+.motion .cell.blast { animation: blast .6s var(--ease); z-index: 3; }
+@keyframes blast { 0% { transform: scale(1); } 25% { transform: scale(1.35) rotate(-6deg); } 50% { transform: scale(.9) rotate(4deg); } 100% { transform: scale(1); } }
+
+.tools.five { grid-template-columns: repeat(5, 1fr); }
+
+.mine-list { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; font-weight: 600; color: var(--muted); font-size: 13px; }
+.mine-list b {
+  display: grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 999px;
+  background: color-mix(in srgb, var(--danger) 16%, var(--surface)); color: var(--text); font-weight: 800;
+}
+.mine-list b.off { opacity: .3; text-decoration: line-through; }
+.mine-list[hidden] { display: none; }

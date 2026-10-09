@@ -1,0 +1,65 @@
+/* Sabotaż: lobby, pasek postępu rywala, odliczanie i efekty ataków. */
+
+.sb-lobby { max-width: 420px; }
+.sb-lobby .segmented { margin-bottom: 4px; }
+.sb-join { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.sb-code-input {
+  min-width: 0; border: 0; border-radius: 999px; padding: 12px 18px; background: var(--cell); color: var(--text);
+  font: 400 20px/1 var(--f-display); letter-spacing: .4em; text-transform: uppercase; text-align: center;
+}
+.sb-code-input:focus { outline: 2px solid var(--accent); }
+.sb-code { display: flex; justify-content: center; gap: 8px; margin: 6px 0 2px; }
+.sb-code i {
+  font: 400 34px/1 var(--f-display); font-style: normal; width: 52px; height: 64px; display: grid; place-items: center;
+  border-radius: 16px; background: var(--cell); color: var(--accent); box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--accent) 22%, transparent);
+  animation: sb-drop .5s var(--ease) both;
+}
+.sb-code i:nth-child(2) { animation-delay: .06s; } .sb-code i:nth-child(3) { animation-delay: .12s; } .sb-code i:nth-child(4) { animation-delay: .18s; }
+@keyframes sb-drop { from { transform: translateY(-14px) scale(.7); opacity: 0; } }
+.sb-status { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0; color: var(--muted); font-weight: 600; }
+.sb-error { margin: 0; padding: 10px 14px; border-radius: 14px; background: color-mix(in srgb, var(--danger) 14%, var(--cell)); color: var(--danger); font-weight: 600; font-size: 14px; }
+
+/* pasek postępu: ty kontra rywal */
+.sb-hud { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sb-side { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 75%, transparent); backdrop-filter: blur(10px); font-size: 12px; font-weight: 700; color: var(--muted); }
+.sb-bar { height: 6px; border-radius: 99px; background: var(--cell); overflow: hidden; }
+.sb-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width .5s var(--ease); }
+.sb-side.opp .sb-bar i { background: var(--danger); }
+.sb-pct { font-variant-numeric: tabular-nums; color: var(--text); min-width: 3ch; text-align: right; }
+
+/* odliczanie */
+.sb-countdown { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; font: 400 min(34cqw, 160px)/1 var(--f-display); color: var(--accent); pointer-events: none; text-shadow: 0 10px 40px color-mix(in srgb, var(--accent) 40%, transparent); }
+.sb-countdown.tick { animation: sb-tick .9s var(--ease); }
+.sb-countdown.go { font-size: min(18cqw, 90px); animation: sb-go .6s var(--ease) forwards; }
+@keyframes sb-tick { from { transform: scale(1.8); opacity: 0; } 30% { opacity: 1; } to { transform: scale(.9); } }
+@keyframes sb-go { from { transform: scale(.6); } 40% { transform: scale(1.15); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
+.sb-wait .board { filter: blur(14px) saturate(.4); }
+
+/* komunikaty na planszy */
+.sb-toasts { position: absolute; left: 0; right: 0; top: 8%; z-index: 9; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+.sb-toast { padding: 9px 16px; border-radius: 999px; background: var(--surface); color: var(--text); font-weight: 800; font-size: 15px; box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .45); animation: sb-toast 1.9s var(--ease) forwards; }
+.sb-toast.hit { background: var(--danger); color: #fff; font-size: 18px; }
+.sb-toast.sent { background: var(--accent); color: var(--on-accent); }
+.sb-toast.warn { background: #2a6df4; color: #fff; }
+@keyframes sb-toast { from { transform: translateY(-10px) scale(.6); opacity: 0; } 12% { transform: none; opacity: 1; } 80% { opacity: 1; } to { transform: translateY(-14px); opacity: 0; } }
+
+/* ataki: zamazanie, obrót, zakaz cyfry, zamrożenie */
+.board { transition: transform .9s cubic-bezier(.3, 1.4, .4, 1), filter .4s; }
+.board.sb-rot { transform: rotate(calc(var(--sb-turns) * 90deg)); }
+.board.sb-rot .cell > .val, .board.sb-rot .cell > .notes { transform: rotate(calc(var(--sb-turns) * -90deg)); transition: transform .9s cubic-bezier(.3, 1.4, .4, 1); }
+.board.sb-blur { filter: blur(.9cqw); }
+.key.sb-ban { opacity: 1 !important; position: relative; background: color-mix(in srgb, var(--danger) 16%, var(--cell)); color: var(--danger); animation: shake .4s; }
+.key.sb-ban::after { content: ''; position: absolute; left: 16%; right: 16%; top: 50%; height: 3px; border-radius: 3px; background: var(--danger); transform: rotate(-35deg); }
+.keypad { position: relative; }
+.keypad.sb-frozen .key { filter: saturate(.2); opacity: .45; }
+.sb-freeze { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 16px; background: color-mix(in srgb, #8fd3ff 30%, transparent); backdrop-filter: blur(2px); color: #0b4f8a; font: 800 20px var(--f-body); z-index: 3; }
+
+/* legenda w „Jak grać” */
+.sr-badge.sb-r { background: var(--cell); color: var(--text); font-weight: 800; }
+.sr-badge.sb-r-ban { position: relative; color: var(--danger); }
+.sr-badge.sb-r-ban::after { content: ''; position: absolute; left: 18%; right: 18%; top: 50%; height: 2px; background: var(--danger); transform: rotate(-35deg); }
+.sr-badge.sb-r-blur { filter: blur(1.5px); }
+.sr-badge.sb-r-rot { color: var(--accent); }
+
+:root:not(.motion) .board, :root:not(.motion) .board .cell > * { transition: none !important; }
+.sb-code-input::placeholder { color: var(--muted); opacity: .45; }

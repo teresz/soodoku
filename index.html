@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f4fb">
+<title>soodoku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@300;400;500;700&display=swap">
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+
+<div class="home" id="home">
+  <div class="lang-switch" id="lang-home" role="radiogroup" aria-label="Język" data-i18n-aria="lang.label"></div>
+  <div class="hero">
+    <div class="hero-mark" id="hero-mark" aria-hidden="true"></div>
+    <h1 class="hero-title">soodoku</h1>
+    <p class="hero-sub" data-i18n="app.sub">Sudoku, które nie wygląda jak sudoku.</p>
+  </div>
+  <button class="continue" id="btn-continue" type="button" hidden>
+    <span class="continue-label" data-i18n="home.continue">Kontynuuj</span>
+    <span class="continue-what" id="continue-what"></span>
+    <span class="continue-bar"><i id="continue-progress"></i></span>
+    <span class="continue-meta" id="continue-meta"></span>
+  </button>
+  <p class="section-label" data-i18n="home.modes">Tryby</p>
+  <div class="mode-cards" id="mode-cards"></div>
+  <div class="home-actions">
+    <button class="home-btn" id="home-settings" type="button"><span class="ico ico-gear"></span><span data-i18n="home.settings">Ustawienia</span></button>
+    <button class="home-btn" id="home-stats" type="button"><span class="ico ico-stats"></span><span data-i18n="home.stats">Statystyki</span></button>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+  <header class="top">
+    <div class="brand">
+      <button class="icon-btn" id="btn-menu" type="button" aria-label="Menu" data-i18n-aria="top.menu"><span class="ico ico-back"></span></button>
+      <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></span>
+      <span class="logo">soodoku</span>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btn-rules" type="button" hidden aria-label="Jak grać" title="Jak grać" data-i18n-aria="rules.title" data-i18n-title="rules.title"><span class="ico ico-help"></span></button>
+      <button class="icon-btn" id="btn-resign" type="button" aria-label="Zakończ grę" title="Zakończ grę" data-i18n-aria="top.resign" data-i18n-title="top.resign"><span class="ico ico-flag"></span></button>
+      <button class="icon-btn" id="btn-settings" type="button" aria-label="Ustawienia" data-i18n-aria="top.settings"><span class="ico ico-gear"></span></button>
+    </div>
+  </header>
+
+  <div class="meta" aria-live="polite">
+    <span class="chip"><span id="meta-mode">Logika</span><span class="dot"></span><b id="meta-diff">Średni</b></span>
+    <span class="chip" id="chip-mistakes"><span data-i18n="meta.mistakes">Błędy</span> <b id="meta-mistakes">0/3</b></span>
+    <span class="chip" id="chip-mines" hidden title="Miny" data-i18n-title="mine.left"><span aria-hidden="true">💣</span> <b id="meta-mines">0</b></span>
+    <span class="chip timer" id="chip-timer">
+      <b id="meta-time">00:00</b>
+      <button class="pause" id="btn-pause" type="button" aria-label="Pauza" data-i18n-aria="meta.pause"><span class="pause-icon"></span></button>
+    </span>
+  </div>
+
+  <div class="board-wrap backlit">
+    <div class="board" id="board" role="grid" aria-label="Plansza sudoku" data-i18n-aria="board.label"></div>
+    <div class="paused-cover" id="paused" hidden>
+      <p data-i18n="paused.title">Pauza</p>
+      <button class="btn-accent" id="btn-resume" type="button" data-i18n="paused.resume">Graj dalej</button>
+      <button class="btn-quiet" id="btn-resign-paused" type="button" data-i18n="top.resign">Zakończ grę</button>
+    </div>
+  </div>
+
+  <div class="mine-list" id="mine-list" hidden></div>
+
+  <div class="keypad" id="keypad"></div>
+
+  <div class="tools" id="tools">
+    <button class="tool" id="tool-undo" type="button"><span class="ico ico-undo"></span><span data-i18n="tool.undo">Cofnij</span></button>
+    <button class="tool" id="tool-erase" type="button"><span class="ico ico-erase"></span><span data-i18n="tool.erase">Gumka</span></button>
+    <button class="tool" id="tool-notes" type="button" aria-pressed="false"><span class="ico ico-pencil"></span><span data-i18n="tool.notes">Notatki</span></button>
+    <button class="tool" id="tool-flag" type="button" aria-pressed="false" hidden><span class="ico ico-flag"></span><span data-i18n="tool.flag">Flaga</span></button>
+    <button class="tool" id="tool-hint" type="button"><span class="ico ico-bulb"></span><span data-i18n="tool.hint">Podpowiedź</span></button>
+  </div>
+  <p class="keys-help" id="keys-help">Dwuklik w cyfrę kasuje. Strzałki, 1–9, Shift+cyfra = notatka, N notatki, Backspace, Ctrl+Z, H podpowiedź, P pauza, Esc menu</p>
+</div>
+
+<div class="overlay" id="sheet-new" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="new-title">
+    <h2 id="new-title">Logika</h2>
+    <p class="sheet-sub" id="new-sub"></p>
+    <p class="sheet-label" data-i18n="new.level">Poziom</p>
+    <div class="diffs" id="diff-list"></div>
+    <button class="btn-quiet btn-rules-link" id="btn-new-rules" type="button" hidden><span class="ico ico-help"></span><span data-i18n="new.rules">Jak grać?</span></button>
+    <button class="btn-quiet" data-close type="button" data-i18n="new.back">Wróć</button>
+  </div>
+</div>
+
+<div class="overlay" id="sheet-settings" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <h2 id="settings-title" data-i18n="settings.title">Ustawienia</h2>
+    <p class="sheet-label" data-i18n="lang.label">Język</p>
+    <div class="lang-switch wide" id="lang-settings" role="radiogroup" aria-label="Język" data-i18n-aria="lang.label"></div>
+    <p class="sheet-label" data-i18n="settings.colors">Kolory</p>
+    <div class="swatches" id="theme-list"></div>
+    <p class="sheet-label" data-i18n="settings.appearance">Wygląd</p>
+    <div class="segmented" id="appearance" role="radiogroup" aria-label="Wygląd" data-i18n-aria="settings.appearance"></div>
+    <p class="sheet-label" data-i18n="settings.game">Gra</p>
+    <div class="toggles" id="toggle-list"></div>
+    <button class="btn-quiet" data-close type="button" data-i18n="settings.done">Gotowe</button>
+  </div>
+</div>
+
+<div class="overlay" id="sheet-end" hidden>
+  <div class="sheet end" role="dialog" aria-modal="true" aria-labelledby="end-title">
+    <h2 id="end-title">Rozwiązane</h2>
+    <p class="end-sub" id="end-sub"></p>
+    <dl class="end-stats" id="end-stats"></dl>
+    <div class="end-actions" id="end-actions"></div>
+  </div>
+</div>
+
+<div class="overlay" id="sheet-resign" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="resign-title">
+    <h2 id="resign-title" data-i18n="resign.title">Zakończyć grę?</h2>
+    <p class="sheet-sub" data-i18n="resign.sub">Gra liczy się jako przegrana, a na planszy pokaże się rozwiązanie.</p>
+    <button class="btn-danger" id="btn-resign-yes" type="button" data-i18n="resign.yes">Zakończ grę</button>
+    <button class="btn-quiet" data-close type="button" data-i18n="resign.no">Graj dalej</button>
+  </div>
+</div>
+
+<div class="overlay" id="sheet-rules" hidden>
+  <div class="sheet rules" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+    <p class="sheet-label" id="rules-mode"></p>
+    <h2 id="rules-title" data-i18n="rules.title">Jak grać</h2>
+    <div class="rules-body" id="rules-body"></div>
+    <button class="btn-accent" id="btn-rules-ok" type="button" data-i18n="rules.ok">Jasne, gramy</button>
+  </div>
+</div>
+
+<div class="overlay" id="sheet-stats" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+    <h2 id="stats-title" data-i18n="stats.title">Statystyki</h2>
+    <div class="stats-table-wrap" id="stats-body"></div>
+    <button class="btn-quiet" data-close type="button" data-i18n="stats.close">Zamknij</button>
+  </div>
+</div>
+
+<div class="busy" id="busy" hidden><span class="spinner"></span><span data-i18n="busy">Generuję planszę</span></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

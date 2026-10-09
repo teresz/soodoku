@@ -1,0 +1,67 @@
+/* Tetroku: tacka z klockami zamiast klawiatury, cień klocka na planszy, napisy combo. */
+.tet-tray { display: flex; flex-direction: column; gap: 8px; container-type: inline-size; touch-action: none; user-select: none; }
+.tet-fall { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--surface) 70%, transparent); overflow: hidden; }
+.tet-fall i { display: block; height: 100%; border-radius: 3px; background: var(--accent); transform-origin: left; transition: background-color .3s; }
+.tet-fall.low i { background: var(--danger); }
+.tet-row { display: grid; grid-template-columns: 1fr 22%; gap: 8px; align-items: stretch; }
+.tet-row:has(.tet-hold[hidden]) { grid-template-columns: 1fr; }
+.tet-queue { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); gap: 8px; }
+.tet-slot {
+  position: relative; display: grid; place-items: center; aspect-ratio: 1; max-height: 30cqw; min-width: 0; width: 100%;
+  border-radius: 18px; background: color-mix(in srgb, var(--surface) 80%, transparent); backdrop-filter: blur(10px);
+  container-type: size;
+}
+.tet-queue .tet-slot { justify-self: center; }
+.tet-hold { display: flex; flex-direction: column; gap: 4px; align-items: stretch; border-radius: 18px; transition: transform .2s var(--ease); }
+.tet-hold-label { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; color: var(--muted); text-align: center; }
+.tet-hold .tet-slot { background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--muted) 45%, transparent); }
+.tet-hold.over .tet-slot { box-shadow: inset 0 0 0 2.5px var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.tet-hold.used .tet-hold-label { opacity: .4; }
+
+/* Klocek: siatka kafelków; w slocie kafel to 1/5 boku, żeby zmieścił się nawet pięciopolowy. */
+.tet-piece { --tile: min(calc(78cqmin / var(--m, 4)), 26cqmin); display: grid; grid-template-columns: repeat(var(--w), var(--tile)); grid-template-rows: repeat(var(--h), var(--tile)); gap: calc(var(--tile) * .06); cursor: grab; touch-action: none; transition: transform .2s var(--ease), opacity .15s; }
+.tet-piece:active { cursor: grabbing; }
+.tet-tile {
+  display: grid; place-items: center; border-radius: calc(var(--tile) * .22);
+  background: var(--pc); color: var(--on-accent);
+  font-family: var(--f-display); font-weight: 500; font-size: calc(var(--tile) * .55); line-height: 1;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, #000 18%, transparent);
+}
+.hue0 { --pc: var(--accent); }
+.hue1 { --pc: color-mix(in srgb, var(--accent) 65%, var(--glow-b)); }
+.hue2 { --pc: color-mix(in srgb, var(--accent) 70%, var(--text)); }
+.hue3 { --pc: color-mix(in srgb, var(--accent) 60%, var(--glow-a)); }
+.tet-piece.lifted { opacity: .25; }
+.tet-piece.picked { transform: scale(1.08); filter: drop-shadow(0 0 6px var(--accent)); }
+.motion .tet-piece.front { animation: tet-wobble 2.4s ease-in-out infinite; }
+@keyframes tet-wobble { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-2deg) translateY(1px); } }
+
+.tet-float { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; will-change: transform; }
+.tet-float .tet-piece { --tile: var(--float-tile); filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .3)); }
+
+/* Cień na planszy: zawsze ten sam kolor, niezależnie od tego, czy klocek pasuje (żeby nie dało się szukać miejsca kolorem). */
+.cell.tet-ghost { background: color-mix(in srgb, var(--accent) 30%, var(--cell)); color: var(--text); box-shadow: inset 0 0 0 .45cqw color-mix(in srgb, var(--accent) 80%, transparent); }
+.cell.tet-ghost .notes { opacity: 0; }
+.cell.tet-blocked { box-shadow: inset 0 0 0 .5cqw color-mix(in srgb, var(--muted) 60%, transparent); }
+.cell.tet-hint { background: color-mix(in srgb, var(--accent) 40%, var(--cell)); color: var(--text); }
+.motion .board.tet-hit { animation: tet-hit .45s; }
+@keyframes tet-hit { 25% { transform: translateY(6px); box-shadow: 0 0 0 3px var(--danger); } }
+
+.tet-score .tet-mult { color: var(--accent); font-weight: 800; }
+.tet-score .tet-mult:empty { display: none; }
+.tet-lives { display: inline-flex; gap: 3px; margin-left: 4px; }
+.tet-lives i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); transition: background-color .3s, transform .3s var(--ease); }
+.tet-lives i.off { background: color-mix(in srgb, var(--danger) 35%, transparent); transform: scale(.75); }
+
+.tet-pop {
+  position: absolute; left: 50%; top: 42%; z-index: 5; pointer-events: none; opacity: 0; white-space: nowrap;
+  font-family: var(--f-display); font-size: 4.6cqw; font-weight: 500; letter-spacing: -.03em; color: var(--accent);
+  padding: .6em 1em; border-radius: 999px; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(8px);
+  box-shadow: 0 12px 30px -14px color-mix(in srgb, var(--text) 50%, transparent);
+  transform: translate(-50%, -50%);
+}
+.tet-pop.bad { color: var(--danger); }
+.tet-pop.big { font-size: 7.5cqw; font-weight: 700; }
+.tet-pop.show { animation: tet-pop 1.1s var(--ease) both; }
+@keyframes tet-pop { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -90%) scale(1); } }
+.tet-queue .tet-slot { max-width: 30cqw; }
