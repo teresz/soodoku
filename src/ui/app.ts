@@ -317,6 +317,8 @@ export function startApp(initial: SavedGame | null) {
   function input(d: number, forceNote = false) {
     if (selected === null || paused) return;
     const i = selected;
+    // Ta sama cyfra co w polu = gumka (klawiatura pod planszą i klawisz na PC).
+    if (!notesMode && !forceNote && !game.state.tetroku && game.state.values[i] === d && !game.isGiven(i)) { erase(); return; }
     if (sab.blocked(notesMode || forceNote ? null : d)) { animate(keypadEl, 'shake', 0, 400); return; }
     if (notesMode || forceNote || game.state.tetroku) {
       if (game.toggleNote(i, d).changed) { persist(); render(); }

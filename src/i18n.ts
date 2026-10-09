@@ -30,7 +30,7 @@ const PL = {
   'tool.notes': 'Notatki',
   'tool.hint': 'Podpowiedź',
   'tool.hintsLeft': 'Zostało podpowiedzi: {n} z {max}',
-  'help.keys': 'Dwuklik w cyfrę kasuje. Strzałki, 1–9, Shift+cyfra = notatka, N notatki, Backspace, Ctrl+Z, H podpowiedź, P pauza, Esc menu',
+  'help.keys': 'Dwuklik w cyfrę albo ta sama cyfra jeszcze raz kasuje. Strzałki, 1–9, Shift+cyfra = notatka, N notatki, Backspace, Ctrl+Z, H podpowiedź, P pauza, Esc menu',
   'busy': 'Generuję planszę',
 
   'new.level': 'Poziom',
@@ -445,7 +445,7 @@ const EN: Record<Key, string> = {
   'tool.notes': 'Notes',
   'tool.hint': 'Hint',
   'tool.hintsLeft': 'Hints left: {n} of {max}',
-  'help.keys': 'Double-tap a digit to erase it. Arrows, 1–9, Shift+digit = note, N notes, Backspace, Ctrl+Z, H hint, P pause, Esc menu',
+  'help.keys': 'Double-tap a digit or press the same digit again to erase it. Arrows, 1–9, Shift+digit = note, N notes, Backspace, Ctrl+Z, H hint, P pause, Esc menu',
   'busy': 'Generating a puzzle',
 
   'new.level': 'Level',
