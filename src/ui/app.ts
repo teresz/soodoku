@@ -9,6 +9,8 @@ import { createSiegeView } from '../modes/siege/view';
 import { createSabotageView } from '../modes/sabotage/view';
 import { createDailyView } from '../daily/view';
 import { currentStreak, dayKey, loadProgress, markDone } from '../daily/daily';
+import { onSyncChange, pushDay, startSync } from '../daily/sync';
+import { renderAccountBanner, renderAccountSettings } from './account';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
 import { Settings, loadSettings, saveSettings } from './settings';
 import { Appearance, THEMES, applyTheme, themeVars, watchSystemTheme } from './themes';
@@ -152,6 +154,7 @@ export function startApp(initial: SavedGame | null) {
     closeSheets: () => closeSheets(),
     busy: (on) => { $('busy').hidden = !on; },
     formatTime,
+    accountBanner: renderAccountBanner,
   });
 
   // --- render ---
@@ -561,6 +564,7 @@ export function startApp(initial: SavedGame | null) {
       if (s.unlimited) return showEnd(true, t('daily.end.unlimited'));
       recordResult(s.modeId, s.difficulty, true, s.elapsedMs, s.tetroku?.score);
       const res = markDone(s.daily.day, dayKey(), { ms: s.elapsedMs, mistakes: s.mistakes, hints: s.hints });
+      pushDay(s.daily.day);
       const rec = res.progress[s.daily.day];
       const sub = !res.first ? t('daily.end.replay', { time: formatTime(rec.ms) })
         : res.onTime ? t('daily.end.onTime', { n: currentStreakNow() }) : t('daily.end.late');
@@ -618,6 +622,7 @@ export function startApp(initial: SavedGame | null) {
   const TOGGLES: (keyof Settings)[] = ['checkMistakes', 'highlightPeers', 'highlightSame', 'autoClearNotes', 'showTimer', 'motion'];
 
   function renderSettings() {
+    renderAccountSettings($('account-label'), $('account-box'));
     const dark = document.documentElement.style.colorScheme === 'dark';
     const themeList = $('theme-list');
     themeList.innerHTML = '';
@@ -790,6 +795,14 @@ export function startApp(initial: SavedGame | null) {
   });
   applyStatic();
   renderLang();
+
+  // Konto Google (opcjonalne): po zalogowaniu postęp wyzwań się synchronizuje, więc odświeżamy, co widać.
+  onSyncChange(() => {
+    if (!$('sheet-settings').hidden) renderAccountSettings($('account-label'), $('account-box'));
+    daily.refresh();
+    if (screen === 'home') renderHome();
+  });
+  startSync();
 
   showScreen('home');
   // Link z zaproszeniem (?pokoj=KOD) od razu otwiera pokój Sabotażu.

@@ -105,9 +105,25 @@ const KEY = 'kratka.daily.v1';
 export function loadProgress(): DailyProgress {
   try { return (JSON.parse(localStorage.getItem(KEY) ?? '{}') as DailyProgress) ?? {}; } catch { return {}; }
 }
-const saveProgress = (p: DailyProgress) => {
+export const saveProgress = (p: DailyProgress) => {
   try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* trudno */ }
 };
+
+/**
+ * Łączy dwa zapisy tego samego dnia (np. z dwóch telefonów albo stary z nową grą):
+ * „w terminie” raz zdobyte zostaje, czas bierzemy najlepszy, datę ukończenia najwcześniejszą.
+ */
+export function mergeRecord(a: DayRecord | undefined, b: DayRecord | undefined): DayRecord | undefined {
+  if (!a || !b) return a ?? b;
+  const best = a.ms <= b.ms ? a : b;
+  return { ms: best.ms, mistakes: best.mistakes, hints: best.hints, onTime: a.onTime || b.onTime, doneOn: a.doneOn <= b.doneOn ? a.doneOn : b.doneOn };
+}
+
+export function mergeProgress(a: DailyProgress, b: DailyProgress): DailyProgress {
+  const out: DailyProgress = {};
+  for (const day of new Set([...Object.keys(a), ...Object.keys(b)])) out[day] = mergeRecord(a[day], b[day])!;
+  return out;
+}
 
 /**
  * Zapisuje ukończenie wyzwania z dnia `day`, zrobione dnia `today`.
@@ -116,9 +132,7 @@ const saveProgress = (p: DailyProgress) => {
 export function recordDaily(progress: DailyProgress, day: string, today: string, r: { ms: number; mistakes: number; hints: number }): { progress: DailyProgress; first: boolean; onTime: boolean } {
   const prev = progress[day];
   const onTime = day === today;
-  const next: DayRecord = prev
-    ? { ...prev, onTime: prev.onTime || onTime, ms: Math.min(prev.ms, r.ms), mistakes: prev.ms <= r.ms ? prev.mistakes : r.mistakes, hints: prev.ms <= r.ms ? prev.hints : r.hints }
-    : { ...r, onTime, doneOn: today };
+  const next = mergeRecord(prev, { ...r, ms: Math.round(r.ms), onTime, doneOn: today })!;
   return { progress: { ...progress, [day]: next }, first: !prev, onTime };
 }
 

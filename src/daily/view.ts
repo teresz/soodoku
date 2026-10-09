@@ -19,6 +19,8 @@ export interface DailyDeps {
   closeSheets: () => void;
   busy: (on: boolean) => void;
   formatTime: (ms: number) => string;
+  /** Pasek konta w kalendarzu (logowanie Google albo „postęp w chmurze”). */
+  accountBanner: (el: HTMLElement) => void;
 }
 
 const $ = (id: string) => document.getElementById(id) as HTMLElement;
@@ -201,7 +203,9 @@ export function createDailyView(deps: DailyDeps) {
         <span><i class="lg-late"></i>${t('daily.legend.late')}</span>
         <span><i class="lg-missed"></i>${t('daily.legend.missed')}</span>
       </div>
+      <div class="cal-account" hidden></div>
       <button class="btn-quiet" type="button" data-close>${t('stats.close')}</button>`;
+    deps.accountBanner(box.querySelector('.cal-account') as HTMLElement);
     box.querySelector('[data-act="prev"]')!.addEventListener('click', () => { month = month.m === 0 ? { y: month.y - 1, m: 11 } : { y: month.y, m: month.m - 1 }; renderCalendar(); });
     box.querySelector('[data-act="next"]')!.addEventListener('click', () => { month = month.m === 11 ? { y: month.y + 1, m: 0 } : { y: month.y, m: month.m + 1 }; renderCalendar(); });
     box.querySelector('[data-close]')!.addEventListener('click', () => deps.closeSheets());
