@@ -5,7 +5,7 @@ import { Room, RoomMsg, joinRoom } from '../../net/room';
 import { currentAccount, onSyncChange } from '../../daily/sync';
 import { cleanEmail } from './matches';
 import {
-  AttackKind, AttackQueue, COUNTDOWN_MS, LEVELS, Level, SELF_FREEZE_MS, WALKOVER_MS,
+  AttackKind, AttackQueue, COUNTDOWN_MS, LEVELS, Level, WALKOVER_MS, selfPenalty,
   attacksFor, decideWinner, makeCode, normalizeCode,
 } from './engine';
 
@@ -57,6 +57,8 @@ export function createSabotageView(deps: SabotageDeps) {
   let goneTimer = 0;
   let readyTimer = 0;
   let frozenUntil = 0;
+  let selfBlurUntil = 0;
+  let mistakes = 0; // błędy w tej rundzie, kara rośnie i już nie spada
   let turns = 0; // obroty planszy (rosną, żeby animacja zawsze kręciła w tę samą stronę)
   const queue = new AttackQueue();
 
@@ -245,7 +247,7 @@ export function createSabotageView(deps: SabotageDeps) {
     phase = 'countdown';
     myWonMs = theirWonMs = null;
     oppProgress = 0;
-    frozenUntil = 0;
+    frozenUntil = selfBlurUntil = mistakes = 0;
     queue.clear();
     turns = 0;
     sheet.hidden = true;
@@ -305,6 +307,7 @@ export function createSabotageView(deps: SabotageDeps) {
     tickAttacks();
     if (wasActive && !queue.active) deps.render();
     if (frozenUntil && now() >= frozenUntil) { frozenUntil = 0; deps.render(); }
+    if (selfBlurUntil && now() >= selfBlurUntil) { selfBlurUntil = 0; deps.render(); }
     if (frozenUntil) freezeEl.textContent = `❄ ${Math.ceil((frozenUntil - now()) / 1000)}`;
   }, 150);
 
@@ -423,8 +426,11 @@ export function createSabotageView(deps: SabotageDeps) {
     afterMove(_i: number, r: MoveResult) {
       if (!inGame() || phase !== 'playing' || !r.changed) return;
       if (r.wrong) {
-        frozenUntil = now() + SELF_FREEZE_MS;
-        toast(`❄ ${t('sab.frozen')}`, 'warn');
+        const pen = selfPenalty(++mistakes);
+        frozenUntil = now() + pen.freeze;
+        if (pen.blur) selfBlurUntil = Math.max(selfBlurUntil, now() + pen.blur);
+        const s = pen.freeze / 1000, b = pen.blur / 1000;
+        toast(`❄ ${b ? t('sab.frozenBlur', { s, b }) : t('sab.frozen', { s })}`, 'warn');
       }
       room?.send({ t: 'progress', round, p: myProgress() });
       const units = r.won ? [] : r.completedUnits ?? [];
@@ -465,7 +471,7 @@ export function createSabotageView(deps: SabotageDeps) {
       const on = inGame();
       renderHud();
       const tn = now();
-      deps.board.classList.toggle('sb-blur', on && queue.blurred(tn));
+      deps.board.classList.toggle('sb-blur', on && (queue.blurred(tn) || tn < selfBlurUntil));
       deps.board.style.setProperty('--sb-turns', String(on ? turns : 0));
       deps.board.classList.toggle('sb-rot', on && turns > 0);
       const ban = on ? queue.bannedDigit(tn) : null;

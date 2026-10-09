@@ -12,8 +12,20 @@ export type Level = (typeof LEVELS)[number];
 export const DURATION: Record<AttackKind, number> = { ban: 8000, blur: 4000, rotate: 900 };
 /** Po obrocie przez tyle ms kolejny obrót zamienia się w zamazanie. */
 export const ROTATE_GUARD_MS = 10000;
-/** Zła cyfra blokuje wpisywanie u siebie. */
-export const SELF_FREEZE_MS = 3000;
+/**
+ * Kara za złą cyfrę u siebie, rośnie z każdym błędem i już nie spada:
+ * 1. błąd = blokada 3 s, 2. = blokada 5 s + rozmycie 3 s, 3. i dalej = blokada 5 s + rozmycie 5 s.
+ */
+export const SELF_PENALTY = [
+  { freeze: 3000, blur: 0 },
+  { freeze: 5000, blur: 3000 },
+  { freeze: 5000, blur: 5000 },
+] as const;
+
+/** Kara za n-ty błąd w rundzie (n od 1). */
+export function selfPenalty(n: number) {
+  return SELF_PENALTY[Math.min(Math.max(n, 1), SELF_PENALTY.length) - 1];
+}
 /** Odliczanie przed startem. */
 export const COUNTDOWN_MS = 3000;
 /** Tyle czekamy na rywala, który zniknął, zanim przyznamy walkower. */

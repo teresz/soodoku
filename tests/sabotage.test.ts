@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../src/core/rng';
-import { AttackQueue, DURATION, ROTATE_GUARD_MS, attacksFor, decideWinner, makeCode, normalizeCode, pickBanDigit } from '../src/modes/sabotage/engine';
+import { AttackQueue, DURATION, ROTATE_GUARD_MS, attacksFor, decideWinner, selfPenalty, makeCode, normalizeCode, pickBanDigit } from '../src/modes/sabotage/engine';
 
 const counts = (full: number[] = []) => [0, ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => (full.includes(d) ? 9 : 3))];
 
@@ -43,6 +43,13 @@ describe('Sabotaż', () => {
     const q = new AttackQueue();
     q.push('ban');
     expect(q.tick(0, counts([1, 2, 3, 4, 5, 6, 7, 8, 9]), makeRng(1))?.kind).toBe('blur');
+  });
+
+  it('kara za błąd rośnie i zostaje na 3. poziomie', () => {
+    expect(selfPenalty(1)).toEqual({ freeze: 3000, blur: 0 });
+    expect(selfPenalty(2)).toEqual({ freeze: 5000, blur: 3000 });
+    expect(selfPenalty(3)).toEqual({ freeze: 5000, blur: 5000 });
+    expect(selfPenalty(12)).toEqual({ freeze: 5000, blur: 5000 });
   });
 
   it('remis wygrywa gospodarz, inaczej krótszy czas', () => {
