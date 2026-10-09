@@ -36,7 +36,8 @@ export function createDailyView(deps: DailyDeps) {
   /** Bieżąca gra, jeśli to rozgrywane wyzwanie z danego dnia. */
   const running = (day: string) => {
     const g = deps.current();
-    return deps.canContinue() && g.state.daily?.day === day ? g : null;
+    // Tryb też musi się zgadzać: stara gra z wcześniejszej rotacji nie udaje dzisiejszego wyzwania.
+    return deps.canContinue() && g.state.daily?.day === day && g.state.modeId === challengeFor(day).modeId ? g : null;
   };
   const stateOf = (p: DailyProgress, day: string): DayState | 'playing' => {
     const st = dayState(p, day, today());

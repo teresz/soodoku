@@ -5,14 +5,14 @@ Codziennie jedna plansza, ta sama dla wszystkich graczy. Kod: `src/daily/` (`dai
 ## Skąd się bierze wyzwanie
 
 - Wyzwanie wynika z samej daty (`challengeFor('RRRR-MM-DD')`), bez serwera. Dzień liczy się w lokalnym czasie telefonu.
-- Tryby rotują po trybach solo (Logika, Odkryte pola, Tetroku, Saperdoku, Oblężenie; bez Sabotażu): w każdym bloku pięciu dni każdy tryb raz, nigdy ten sam dwa dni pod rząd.
+- Wyzwania są tylko z klasycznego sudoku (decyzja teresza): Logika i Odkryte pola na zmianę, dzień po dniu.
 - Trudność rośnie w ciągu tygodnia jak w gazecie: poniedziałek łagodnie, sobota najciężej, niedziela trochę luźniej (plus odrobina losowości).
-- Mniej więcej co drugi dzień jest haczyk: bez podpowiedzi, jeden błąd i koniec (tylko tryby z limitem błędów, liczy błędy nawet z wyłączonym sprawdzaniem) albo bez notatek.
+- Mniej więcej co drugi dzień jest haczyk: bez podpowiedzi, jeden błąd i koniec (liczy błędy nawet z wyłączonym sprawdzaniem) albo bez notatek.
 - Kalendarz zaczyna się 1 października 2026 (`DAILY_START`).
 
 ## Notatka „Dlaczego to wyzwanie”
 
-Składana z kawałków: zdanie o dniu tygodnia, opis trybu i poziomu z liczbami z planszy (cyfry na start, miny, mur, tempo), technika potrzebna do rozwiązania (dla zwykłych plansz, z oceny solvera) i haczyk. Warianty zdań wybiera liczba dnia, więc notatki różnią się z dnia na dzień.
+Składana z kawałków: zdanie o dniu tygodnia, opis trybu i poziomu z liczbą cyfr na start, technika potrzebna do rozwiązania (z oceny solvera) i haczyk. Warianty zdań wybiera liczba dnia, więc notatki różnią się z dnia na dzień.
 
 ## Postęp i streak
 

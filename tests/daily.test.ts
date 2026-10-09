@@ -18,14 +18,13 @@ describe('wyzwanie dnia', () => {
     expect(challengeFor('2026-10-09').seed).not.toBe(challengeFor('2026-10-10').seed);
   });
 
-  it('tryby rotują: w każdym bloku pięciu dni każdy tryb raz, bez dwóch takich samych dni pod rząd', () => {
+  it('tylko klasyczne sudoku (Logika i Odkryte pola), na zmianę', () => {
     let prev = '';
     for (let k = 0; k < 200; k++) {
       const ch = challengeFor(addDays(DAILY_START, k));
       expect(ch.modeId).not.toBe(prev);
       expect(DAILY_MODES.find((m) => m.id === ch.modeId)!.levels).toContain(ch.difficulty);
-      expect(ch.modeId).not.toBe('sabotage');
-      if (ch.modeId === 'siege') expect(ch.mod).not.toBe('strict'); // Oblężenie nie ma limitu błędów
+      expect(['classic', 'clues']).toContain(ch.modeId);
       prev = ch.modeId;
     }
   });
@@ -59,7 +58,7 @@ describe('wyzwanie dnia', () => {
     expect(dayState(p, '2026-10-10', '2026-10-09')).toBe('future');
   });
 
-  it('notatka jest dla każdego trybu, w obu językach, bez surowych kluczy i różna z dnia na dzień', () => {
+  it('notatka jest dla obu trybów, w obu językach, bez surowych kluczy i różna z dnia na dzień', () => {
     const seen = new Set<string>();
     for (let k = 0; k < 5; k++) {
       const ch = challengeFor(addDays(DAILY_START, k));

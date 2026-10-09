@@ -23,14 +23,13 @@ export interface Challenge {
   flavor: number;
 }
 
-// Tryby solo i ich drabinki (bez Sabotażu, bo to gra we dwóch). Kolejność id = kolejność poziomów.
-export const DAILY_MODES: { id: string; levels: string[]; hasLimit: boolean }[] = [
-  { id: 'classic', levels: ['easy', 'medium', 'hard', 'expert'], hasLimit: true },
-  { id: 'clues', levels: ['c50', 'c42', 'c36', 'c30', 'c26', 'c23'], hasLimit: true },
-  { id: 'tetris', levels: ['t40', 't34', 't30', 't27', 't25', 't23'], hasLimit: true },
-  { id: 'minesweeper', levels: ['m1', 'm2', 'm3', 'm4', 'm5'], hasLimit: true },
-  { id: 'siege', levels: ['s1', 's2', 's3', 's4'], hasLimit: false },
+// Wyzwania są tylko z klasycznego sudoku (decyzja teresza): Logika i Odkryte pola, na zmianę.
+// Kolejność id = kolejność poziomów.
+export const DAILY_MODES: { id: string; levels: string[] }[] = [
+  { id: 'classic', levels: ['easy', 'medium', 'hard', 'expert'] },
+  { id: 'clues', levels: ['c50', 'c42', 'c36', 'c30', 'c26', 'c23'] },
 ];
+const MODS: DailyMod[] = ['noHints', 'strict', 'noNotes'];
 
 // Tydzień rośnie jak w gazecie: poniedziałek na rozgrzewkę, sobota najcięższa, niedziela trochę luźniej.
 const WEEK_RAMP = [0.05, 0.2, 0.38, 0.5, 0.62, 0.92, 0.75];
@@ -61,7 +60,7 @@ export function hashString(s: string): number {
   return h >>> 0;
 }
 
-/** Kolejność trybów w bloku pięciu dni: każdy tryb raz, bez powtórki na styku bloków. */
+/** Kolejność trybów w bloku dni (tyle dni, ile trybów): każdy tryb raz, bez powtórki na styku bloków. */
 function blockOrder(block: number): number[] {
   const order = shuffle(DAILY_MODES.map((_, k) => k), makeRng(hashString(`soodoku-block-${block}`)));
   if (block > 0) {
@@ -82,9 +81,8 @@ export function challengeFor(day: string): Challenge {
   const frac = Math.min(1, Math.max(0, WEEK_RAMP[weekday] + (rng() - 0.5) * 0.22));
   const level = Math.round(frac * (mode.levels.length - 1));
   const roll = rng();
-  const mods: DailyMod[] = mode.hasLimit ? ['noHints', 'strict', 'noNotes'] : ['noHints', 'noNotes'];
   // Mniej więcej co drugi dzień bez haczyka; w weekend haczyk częściej.
-  const mod: DailyMod = roll < (weekday >= 5 ? 0.3 : 0.5) ? 'none' : mods[Math.floor(rng() * mods.length)];
+  const mod: DailyMod = roll < (weekday >= 5 ? 0.3 : 0.5) ? 'none' : MODS[Math.floor(rng() * MODS.length)];
   return {
     day, weekday, modeId: mode.id, difficulty: mode.levels[level], level, levels: mode.levels.length, mod,
     seed: hashString(`soodoku-seed-${day}`) & 0x7fffffff,
