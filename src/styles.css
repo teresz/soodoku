@@ -347,9 +347,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .home-btn .ico { width: 18px; height: 18px; color: var(--muted); }
 .stats-table + .sheet-label { margin-top: 16px; }
 
-/* Przełącznik języka: dwie flagi. W menu w prawym górnym rogu, w ustawieniach na całą szerokość. */
+/* Przełącznik języka: dwie flagi. W menu w prawym górnym rogu (.home-corner w install.css), w ustawieniach na całą szerokość. */
 .lang-switch { display: flex; gap: 6px; }
-.home > .lang-switch { position: absolute; top: calc(28px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 2; }
 .lang-btn {
   display: flex; align-items: center; gap: 7px; padding: 6px 10px 6px 7px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .06em;
   color: var(--muted); background: color-mix(in srgb, var(--surface) 60%, transparent); backdrop-filter: blur(10px);

@@ -25,7 +25,10 @@
 <div class="ambient" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
 
 <div class="home" id="home">
-  <div class="lang-switch" id="lang-home" role="radiogroup" aria-label="Język" data-i18n-aria="lang.label"></div>
+  <div class="home-corner">
+    <button class="pin-btn" id="btn-pin" type="button" aria-label="Przypnij do ekranu startowego" title="Przypnij do ekranu startowego" data-i18n-aria="pin.title" data-i18n-title="pin.title" hidden>!</button>
+    <div class="lang-switch" id="lang-home" role="radiogroup" aria-label="Język" data-i18n-aria="lang.label"></div>
+  </div>
   <div class="hero">
     <div class="hero-mark" id="hero-mark" aria-hidden="true"></div>
     <h1 class="hero-title">soodoku</h1>
@@ -150,6 +153,16 @@
     <h2 id="rules-title" data-i18n="rules.title">Jak grać</h2>
     <div class="rules-body" id="rules-body"></div>
     <button class="btn-accent" id="btn-rules-ok" type="button" data-i18n="rules.ok">Jasne, gramy</button>
+  </div>
+</div>
+
+<div class="overlay" id="sheet-pin" hidden>
+  <div class="sheet rules" role="dialog" aria-modal="true" aria-labelledby="pin-title">
+    <button class="sheet-x" type="button" aria-label="Zamknij" title="Zamknij" data-i18n-aria="sheet.close" data-i18n-title="sheet.close"></button>
+    <h2 id="pin-title" data-i18n="pin.title">Przypnij do ekranu startowego</h2>
+    <button class="btn-accent" id="btn-pin-install" type="button" data-i18n="pin.install" hidden>Zainstaluj soodoku</button>
+    <div class="rules-body" id="pin-body"></div>
+    <button class="btn-quiet" data-close type="button" data-i18n="pin.ok">Jasne</button>
   </div>
 </div>
 

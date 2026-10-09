@@ -1,0 +1,21 @@
+/* Róg menu: wykrzyknik od poradnika przypinania obok flag języków. */
+.home-corner { position: absolute; top: calc(28px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 2; display: flex; align-items: center; gap: 6px; }
+.pin-btn {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  font: 800 15px/1 var(--f-display); color: var(--on-accent); background: var(--accent);
+  box-shadow: 0 6px 16px -6px var(--accent); transition: transform .2s var(--ease);
+}
+.pin-btn:hover { transform: scale(1.08); }
+.pin-btn:active { transform: scale(.94); }
+:root.motion .pin-btn { animation: pin-nudge 6s var(--ease) 2s infinite; }
+@keyframes pin-nudge { 0%, 88%, 100% { transform: rotate(0); } 91% { transform: rotate(-14deg); } 94% { transform: rotate(12deg); } 97% { transform: rotate(-6deg); } }
+
+.pin-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--cell)); }
+.pin-ico svg { width: 22px; height: 22px; }
+.pin-more { border-top: 1px solid var(--line); padding-top: 12px; }
+.pin-more summary { cursor: pointer; font-size: 13px; font-weight: 800; color: var(--muted); list-style: none; display: flex; align-items: center; gap: 6px; }
+.pin-more summary::-webkit-details-marker { display: none; }
+.pin-more summary::before { content: "›"; display: inline-block; font-size: 18px; line-height: 1; transition: transform .2s var(--ease); }
+.pin-more[open] summary::before { transform: rotate(90deg); }
+.pin-more[open] summary { margin-bottom: 12px; }
+.pin-more .rules-body, .pin-more section + section { margin-top: 14px; }
