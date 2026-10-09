@@ -21,6 +21,7 @@ Uwaga: `npm install` nie działa bezpośrednio w `/mnt/project-files` (brak syml
 - `src/modes/tetroku/` – Tetroku (sudoku + tetris, wariant „Układanka”): `engine.ts` to czysta logika (cięcie planszy na klocki, kolejka, schowek, punkty, pasek opadania), `view.ts` tacka z klockami, przeciąganie i klawiatura, `tetroku.css` jej wygląd. Stan siedzi w `SavedGame.tetroku`. Opis zasad: `docs/tetroku.md`.
 - `src/modes/siege/` – Oblężenie (sudoku + tower defense): `engine.ts` czysta logika (mury, wrogowie, fale, strzały, lasery, twierdze, ruiny), `view.ts` warstwa nad planszą z potworami i efektami, `siege.css` wygląd. Stan w `SavedGame.siege`. Zasady: `docs/oblezenie.md`.
 - `src/modes/sabotage/` – Sabotaż, gra we dwóch na dwóch telefonach: `engine.ts` czysta logika ataków (kolejka, ochrona przed podwójnym obrotem, kody pokoi), `view.ts` lobby, pasek rywala, odliczanie i efekty. Zasady: `docs/sabotaz.md`.
+- `src/daily/` – wyzwanie dnia: plansza wyznaczana z daty, notatka „dlaczego to wyzwanie”, kalendarz zrobionych dni i streak (zapis w localStorage). Zasady: `docs/wyzwania.md`.
 - `src/net/` – pokoje multiplayer: Supabase Realtime (broadcast + presence, `config.ts` z publicznym kluczem), a z `?net=local` zamiennik na BroadcastChannel do testów na dwóch kartach.
 - `src/game/` – stan rozgrywki (`game.ts`: wpisywanie, notatki, cofanie, podpowiedzi, błędy) i zapis w localStorage (`storage.ts`: bieżąca gra + statystyki).
 - `src/ui/app.ts` – renderowanie planszy (9 kafli po 9 pól), klawiatura pod planszą i fizyczna, arkusze (nowa gra, ustawienia, wynik, statystyki).
@@ -31,7 +32,7 @@ Uwaga: `npm install` nie działa bezpośrednio w `/mnt/project-files` (brak syml
 
 ## Ekrany
 
-Na start jest menu: Kontynuuj (gdy jest rozpoczęta gra), kafle trybów, Ustawienia i Statystyki. Wybór trybu otwiera listę jego poziomów.
+Na start jest menu: Kontynuuj (gdy jest rozpoczęta gra), karta wyzwania dnia (streak, ostatni tydzień, wejście do kalendarza), kafle trybów, Ustawienia i Statystyki. Wybór trybu otwiera listę jego poziomów.
 
 ## Poziomy trudności
 

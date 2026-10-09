@@ -7,6 +7,8 @@ import { mineCount } from '../modes/saperdoku/engine';
 import { createTetrokuView } from '../modes/tetroku/view';
 import { createSiegeView } from '../modes/siege/view';
 import { createSabotageView } from '../modes/sabotage/view';
+import { createDailyView } from '../daily/view';
+import { currentStreak, dayKey, loadProgress, markDone } from '../daily/daily';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
 import { Settings, loadSettings, saveSettings } from './settings';
 import { Appearance, THEMES, applyTheme, themeVars, watchSystemTheme } from './themes';
@@ -141,6 +143,17 @@ export function startApp(initial: SavedGame | null) {
   });
   const isSab = () => game.state.modeId === 'sabotage';
 
+  // Wyzwanie dnia: karta w menu, arkusz z notatką i kalendarz. Gra-wyzwanie siedzi w zwykłym zapisie gry.
+  const daily = createDailyView({
+    current: () => game,
+    canContinue: () => canContinue(),
+    launch: (g) => begin(g),
+    resume: () => showScreen('game'),
+    closeSheets: () => closeSheets(),
+    busy: (on) => { $('busy').hidden = !on; },
+    formatTime,
+  });
+
   // --- render ---
   function render() {
     const s = game.state;
@@ -199,9 +212,10 @@ export function startApp(initial: SavedGame | null) {
     $('chip-mistakes').hidden = (limit === null && !settings.checkMistakes) || !!s.siege;
     $('chip-timer').classList.toggle('time-hidden', !settings.showTimer);
     $('meta-time').hidden = !settings.showTimer;
-    $('meta-mode').textContent = game.mode.name;
+    $('meta-mode').textContent = s.daily ? `★ ${game.mode.name}` : game.mode.name;
     $('btn-rules').hidden = !game.mode.rules;
     $('tool-notes').setAttribute('aria-pressed', String(notesMode));
+    $('tool-notes').hidden = !game.notesAllowed;
     $('tool-flag').setAttribute('aria-pressed', String(flagMode));
     $<HTMLButtonElement>('tool-undo').disabled = !game.canUndo || s.status !== 'playing';
     const hintBtn = $<HTMLButtonElement>('tool-hint');
@@ -306,7 +320,7 @@ export function startApp(initial: SavedGame | null) {
   }
 
   function hint() {
-    if (paused || isSab()) return;
+    if (paused || isSab() || game.hintsLeft === 0) return;
     if (game.state.tetroku) { tet.hint(); return; }
     const h = game.hint(selected);
     if (!h) return;
@@ -314,7 +328,7 @@ export function startApp(initial: SavedGame | null) {
     handleResult(h.index, h.result);
   }
 
-  function toggleNotes() { notesMode = !notesMode; if (notesMode) flagMode = false; render(); }
+  function toggleNotes() { if (!game.notesAllowed) return; notesMode = !notesMode; if (notesMode) flagMode = false; render(); }
   function toggleFlagMode() { if (!game.state.saper) return; flagMode = !flagMode; if (flagMode) notesMode = false; render(); }
 
   function flag() {
@@ -361,20 +375,27 @@ export function startApp(initial: SavedGame | null) {
     $('busy').hidden = false;
     // Daj przeglądarce narysować „Generuję…” zanim zablokujemy ją generatorem.
     window.setTimeout(() => {
-      game = Game.create(modeId, difficulty, randomSeed());
-      applySettings();
-      // W Tetroku nic nie zaznaczamy na start: plansza ma być czysta pod klocki.
-      selected = game.state.tetroku ? null : game.state.values.findIndex((v) => !v);
-      notesMode = false;
-      flagMode = false;
-      paused = false;
-      lastTick = performance.now();
-      persist();
       $('busy').hidden = true;
-      showScreen('game');
-      // Pierwsza gra w trybie z instrukcją: najpierw „Jak grać”.
-      if (game.mode.rules && !rulesSeen().includes(game.mode.id)) openRules(game.mode);
+      begin(Game.create(modeId, difficulty, randomSeed()));
     }, 40);
+  }
+
+  /** Start świeżej gry (zwykłej albo wyzwania dnia). */
+  function begin(next: Game) {
+    closeSheets();
+    game = next;
+    applySettings();
+    // W Tetroku nic nie zaznaczamy na start: plansza ma być czysta pod klocki.
+    selected = game.state.tetroku ? null : game.state.values.findIndex((v) => !v);
+    if (selected !== null && selected < 0) selected = null;
+    notesMode = false;
+    flagMode = false;
+    paused = false;
+    lastTick = performance.now();
+    persist();
+    showScreen('game');
+    // Pierwsza gra w trybie z instrukcją: najpierw „Jak grać”.
+    if (game.mode.rules && !rulesSeen().includes(game.mode.id)) openRules(game.mode);
   }
 
   // --- ekrany: menu i gra ---
@@ -405,10 +426,11 @@ export function startApp(initial: SavedGame | null) {
     if (canContinue()) {
       const empty = s.puzzle.filter((v) => !v).length;
       const done = s.values.filter((_, i) => !s.puzzle[i] && game.isDone(i)).length;
-      $('continue-what').textContent = `${game.mode.name} · ${difficultyLabel(s.modeId, s.difficulty)}`;
+      $('continue-what').textContent = `${s.daily ? `★ ${t('daily.title')}: ` : ''}${game.mode.name} · ${difficultyLabel(s.modeId, s.difficulty)}`;
       $('continue-progress').style.width = `${Math.round((done / Math.max(1, empty)) * 100)}%`;
       $('continue-meta').textContent = `${formatTime(s.elapsedMs)} · ${t('home.progress', { p: Math.round((done / Math.max(1, empty)) * 100) })}`;
     }
+    daily.renderCard();
     const list = $('mode-cards');
     list.innerHTML = '';
     for (const m of MODES) {
@@ -497,6 +519,7 @@ export function startApp(initial: SavedGame | null) {
     const sheet = $('sheet-end');
     (sheet.firstElementChild as HTMLElement).classList.toggle('lost', !won);
     $('end-title').textContent = s.modeId === 'sabotage' ? t(won ? 'sab.end.winTitle' : 'sab.end.loseTitle')
+      : s.daily && !resigned ? t(won ? 'daily.end.wonTitle' : 'daily.end.lostTitle')
       : t(resigned ? 'end.over' : won ? (newBest ? 'end.record' : 'end.solved') : 'end.lost');
     $('end-sub').textContent = sub;
     $('end-stats').innerHTML = [
@@ -513,7 +536,13 @@ export function startApp(initial: SavedGame | null) {
       actions.appendChild(b);
     };
     const label = difficultyLabel(s.modeId, s.difficulty);
-    if (s.modeId === 'sabotage') {
+    if (s.daily) {
+      const day = s.daily.day;
+      if (!won && !resigned) add(t('end.continueUnlimited'), 'btn-accent', () => { game.continueAfterLoss(); closeSheets(); persist(); render(); });
+      if (won) add(t('daily.end.calendar'), 'btn-accent', () => { showScreen('home'); daily.openCalendar(day); });
+      else add(t('daily.retry'), resigned ? 'btn-accent' : 'btn-quiet', () => { showScreen('home'); daily.openDay(day); });
+      add(t('end.menu'), 'btn-quiet', () => { closeSheets(); showScreen('home'); });
+    } else if (s.modeId === 'sabotage') {
       add(t('sab.end.rematch'), 'btn-accent', () => { sab.rematch(); });
       add(t('end.menu'), 'btn-quiet', () => { closeSheets(); showScreen('home'); });
     } else if (won || resigned) {
@@ -528,6 +557,15 @@ export function startApp(initial: SavedGame | null) {
 
   function showWin() {
     const s = game.state;
+    if (s.daily) {
+      if (s.unlimited) return showEnd(true, t('daily.end.unlimited'));
+      recordResult(s.modeId, s.difficulty, true, s.elapsedMs, s.tetroku?.score);
+      const res = markDone(s.daily.day, dayKey(), { ms: s.elapsedMs, mistakes: s.mistakes, hints: s.hints });
+      const rec = res.progress[s.daily.day];
+      const sub = !res.first ? t('daily.end.replay', { time: formatTime(rec.ms) })
+        : res.onTime ? t('daily.end.onTime', { n: currentStreakNow() }) : t('daily.end.late');
+      return showEnd(true, sub);
+    }
     if (s.unlimited) return showEnd(true, t('end.unlimitedWin'));
     if (s.modeId === 'sabotage') {
       // Obaj skończyli prawie naraz: rozstrzyga czas od startu.
@@ -544,7 +582,8 @@ export function startApp(initial: SavedGame | null) {
     const best = stats.bestMs !== null ? formatTime(stats.bestMs) : '–';
     showEnd(true, newBest ? t('end.bestTime', { mode: game.mode.name, level: difficultyLabel(s.modeId, s.difficulty).toLowerCase() }) : t('end.recordTime', { time: best }), newBest);
   }
-  const showLoss = () => showEnd(false, t(game.state.tetroku ? 'end.lossTetroku' : game.state.saper ? 'end.lossSaper' : game.state.siege ? 'end.lossSiege' : 'end.loss'));
+  const currentStreakNow = () => currentStreak(loadProgress(), dayKey());
+  const showLoss = () => showEnd(false, game.state.daily ? t('daily.end.loss') : t(game.state.tetroku ? 'end.lossTetroku' : game.state.saper ? 'end.lossSaper' : game.state.siege ? 'end.lossSiege' : 'end.loss'));
 
   function askResign() {
     if (game.state.status !== 'playing' || screen !== 'game') return;
@@ -564,7 +603,7 @@ export function startApp(initial: SavedGame | null) {
     persist();
     render();
     for (let j = 0; j < CELLS; j++) if (!s.puzzle[j]) animate(j, 'pop', (rowOf(j) + colOf(j)) * 20, 400);
-    window.setTimeout(() => showEnd(false, t('end.resigned'), false, true), settings.motion ? 700 : 100);
+    window.setTimeout(() => showEnd(false, t(s.daily ? 'daily.end.resigned' : 'end.resigned'), false, true), settings.motion ? 700 : 100);
   }
 
   function updateSettings(patch: Partial<Settings>) {
@@ -745,6 +784,7 @@ export function startApp(initial: SavedGame | null) {
     if (!$('sheet-settings').hidden) renderSettings();
     if (!$('sheet-stats').hidden) openStats();
     if (!$('sheet-rules').hidden) openRules(MODES.find((m) => m.id === $('sheet-rules').dataset.mode) ?? game.mode);
+    daily.refresh();
     if (!$('sheet-new').hidden && $('new-title').dataset.mode) openNew(MODES.find((m) => m.id === $('new-title').dataset.mode)!);
     if (screen === 'game') render(); else renderHome();
   });

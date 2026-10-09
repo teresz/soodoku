@@ -5,6 +5,7 @@ import { deduce } from '../modes/saperdoku/engine';
 import type { SaperState } from '../modes/saperdoku/engine';
 import type { TetrokuState } from '../modes/tetroku/engine';
 import type { SiegeState } from '../modes/siege/engine';
+import type { DailyTag } from '../daily/daily';
 
 export type Status = 'playing' | 'won' | 'lost';
 
@@ -28,6 +29,7 @@ export interface SavedGame {
   tetroku?: TetrokuState; // tylko w trybie Tetroku: kolejka, schowek, punkty
   saper?: SaperState; // tylko w Saperdoku: miny i flagi
   siege?: SiegeState; // tylko w Oblężeniu: mury, wrogowie, ruiny
+  daily?: DailyTag; // wyzwanie dnia: z którego dnia i jaki haczyk
 }
 
 export interface MoveResult {
@@ -77,8 +79,14 @@ export class Game {
   }
 
   get mode() { return getMode(this.state.modeId); }
-  get mistakeLimit() { return this.state.unlimited || !this.options.checkMistakes ? null : this.mode.mistakeLimit; }
-  get hintsLeft() { return Math.max(0, HINT_LIMIT - this.state.hints); }
+  /** Haczyk wyzwania dnia: „jeden błąd” liczy błędy nawet z wyłączonym sprawdzaniem. */
+  private get strict() { return this.state.daily?.mod === 'strict' && this.mode.mistakeLimit !== null; }
+  private get checking() { return this.options.checkMistakes || this.strict; }
+  /** Limit trybu po haczykach, bez patrzenia na ustawienia (Saperdoku liczy wybuchy zawsze). */
+  private get baseLimit() { return this.state.unlimited ? null : this.strict ? 1 : this.mode.mistakeLimit; }
+  get mistakeLimit() { return this.checking ? this.baseLimit : null; }
+  get hintsLeft() { return this.state.daily?.mod === 'noHints' ? 0 : Math.max(0, HINT_LIMIT - this.state.hints); }
+  get notesAllowed() { return this.state.daily?.mod !== 'noNotes'; }
   get canUndo() { return this.history.length > 0 && !this.state.tetroku && !this.state.siege; }
 
   /** Pole startowe (albo ruina w Oblężeniu): nie da się go zmienić. */
@@ -104,7 +112,7 @@ export class Game {
   private get playable() { return this.state.status === 'playing'; }
 
   toggleNote(i: number, d: number): MoveResult {
-    if (!this.playable || this.isGiven(i) || this.state.values[i]) return { changed: false };
+    if (!this.playable || !this.notesAllowed || this.isGiven(i) || this.state.values[i]) return { changed: false };
     this.snapshot();
     this.state.notes[i] ^= bit(d);
     return { changed: true };
@@ -118,7 +126,7 @@ export class Game {
     s.values[i] = d;
     s.notes[i] = 0;
     if (d !== s.solution[i]) {
-      if (!this.options.checkMistakes) return { changed: true };
+      if (!this.checking) return { changed: true };
       s.mistakes++;
       const limit = this.mistakeLimit;
       if (limit !== null && s.mistakes >= limit) { s.status = 'lost'; return { changed: true, wrong: true, lost: true }; }
@@ -135,7 +143,7 @@ export class Game {
     sp.exploded.push(i);
     s.notes[i] = 0;
     s.mistakes++;
-    const limit = this.state.unlimited ? null : this.mode.mistakeLimit;
+    const limit = this.baseLimit;
     if (limit !== null && s.mistakes >= limit) { s.status = 'lost'; return { changed: true, wrong: true, boom: true, lost: true }; }
     return { ...this.afterCorrect(i), wrong: true, boom: true };
   }
@@ -146,7 +154,7 @@ export class Game {
     if (!sp || !this.playable || this.isGiven(i) || this.isFlagged(i) || s.values[i] === s.solution[i]) return { changed: false };
     if (!this.isMine(i)) {
       s.mistakes++;
-      const limit = this.state.unlimited ? null : this.mode.mistakeLimit;
+      const limit = this.baseLimit;
       if (limit !== null && s.mistakes >= limit) { s.status = 'lost'; return { changed: true, wrong: true, lost: true }; }
       return { changed: true, wrong: true };
     }
