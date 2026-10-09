@@ -5,6 +5,7 @@
 .vs-tile small { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
 .vs-tile b { font: 500 32px/1 var(--f-display); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
 .vs-tile span { font-size: 12px; font-weight: 600; opacity: .8; }
+.vs-time { margin-top: 4px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent); font: 500 15px/1.2 var(--f-display); font-style: normal; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .vs-chart { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: end; height: 96px; padding: 10px 10px 4px; border-radius: 18px; background: var(--cell); }
 .vs-bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
 .vs-bar i { width: 100%; max-width: 16px; border-radius: 5px 5px 2px 2px; background: color-mix(in srgb, var(--accent) 45%, var(--cell)); transform-origin: bottom; animation: vs-grow .6s var(--ease) both; }
@@ -12,3 +13,16 @@
 .vs-bar small { font-size: 9px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
 @keyframes vs-grow { from { transform: scaleY(0); } }
 :root:not(.motion) .vs-bar i { animation: none; }
+
+.accounts-box { margin-bottom: 6px; border-radius: 18px; background: var(--cell); overflow: hidden; }
+.accounts-box summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; font-weight: 800; }
+.accounts-box summary::-webkit-details-marker { display: none; }
+.accounts-box summary span { flex: 1; }
+.accounts-box summary b { min-width: 28px; padding: 3px 9px; border-radius: 999px; text-align: center; background: var(--accent); color: var(--on-accent); font: 500 14px/1.2 var(--f-display); }
+.accounts-box summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); rotate: 45deg; transition: rotate .25s var(--ease); }
+.accounts-box[open] summary::after { rotate: 225deg; }
+.accounts-box ul { list-style: none; margin: 0; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow: auto; }
+.accounts-box li { display: flex; flex-direction: column; gap: 2px; padding: 10px 10px; border-radius: 12px; background: var(--surface); }
+.acc-row-mail { font-weight: 700; font-size: 14px; overflow-wrap: anywhere; }
+.accounts-box li small, .accounts-box p { font-size: 12px; color: var(--muted); }
+.accounts-box p { margin: 0; padding: 0 16px 14px; }

@@ -12,8 +12,8 @@ import { createDailyView } from '../daily/view';
 import { currentStreak, dayKey, loadProgress, markDone } from '../daily/daily';
 import { currentAccount, matchSyncState, onSyncChange, pushDay, pushMatches, startSync } from '../daily/sync';
 import { addMatchRecord, renderRivals } from './rivals';
-import { renderVisits } from './visits';
-import { cachedVisits, countVisit, fetchVisits } from '../net/visits';
+import { renderAccounts, renderVisits } from './visits';
+import { cachedAccounts, cachedVisits, countVisit, fetchAccounts, fetchVisits } from '../net/visits';
 import { renderAccountBanner, renderAccountSettings } from './account';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
 import { Settings, loadSettings, saveSettings } from './settings';
@@ -723,8 +723,12 @@ export function startApp(initial: SavedGame | null) {
     }
     // Licznik wejść: tylko admin (serwer innym oddaje null). Rysujemy, co znamy, i dociągamy świeże liczby.
     if (currentAccount()) {
-      $('stats-body').insertAdjacentHTML('afterbegin', `<div id="visits-slot">${renderVisits(cachedVisits())}</div>`);
+      $('stats-body').insertAdjacentHTML('afterbegin', `<div id="visits-slot">${renderVisits(cachedVisits())}</div><div id="accounts-slot">${renderAccounts(cachedAccounts(), false)}</div>`);
       void fetchVisits().then((v) => { const slot = document.getElementById('visits-slot'); if (slot) slot.innerHTML = renderVisits(v); });
+      void fetchAccounts().then((list) => {
+        const slot = document.getElementById('accounts-slot');
+        if (slot) slot.innerHTML = renderAccounts(list, !!slot.querySelector('details[open]'));
+      });
     }
     $('sheet-stats').hidden = false;
   }
