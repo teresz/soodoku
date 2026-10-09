@@ -2,8 +2,8 @@
 // a liczby widzi tylko admin (mail w tabeli site_admins) w Statystykach.
 import { accountsAvailable, rpc } from './account';
 
-export interface VisitCount { visits: number; devices: number }
-export interface VisitStats { today: VisitCount; total: VisitCount; days: { day: string; visits: number; devices: number }[] }
+export interface VisitCount { visits: number; devices: number; seconds?: number }
+export interface VisitStats { today: VisitCount; total: VisitCount; days: { day: string; visits: number; devices: number; seconds?: number }[] }
 
 const DEVICE_KEY = 'soodoku.device';
 
@@ -26,6 +26,34 @@ export function countVisit() {
   const q = new URLSearchParams(location.search);
   if (!accountsAvailable() || location.hostname === 'localhost' || q.get('net') === 'local') return;
   rpc('count_visit', { device: deviceId() }).catch(() => { /* licznik nie może psuć gry */ });
+  trackTime();
+}
+
+/** Ile co najwyżej uznajemy za jeden kawałek czasu (serwer i tak tnie do 120 s). */
+const FLUSH_EVERY_MS = 60000;
+
+/**
+ * Czas na stronie: liczy się tylko, gdy karta jest widoczna. Co minutę i przy schowaniu karty
+ * (przełączenie apki, zamknięcie) dosyłamy uzbierane sekundy do add_time.
+ */
+function trackTime() {
+  let since: number | null = document.hidden ? null : performance.now();
+  let pending = 0;
+  const collect = () => {
+    if (since !== null) { const now = performance.now(); pending += now - since; since = now; }
+  };
+  const flush = (closing = false) => {
+    collect();
+    const secs = Math.round(Math.min(pending, 120000) / 1000);
+    if (secs < 1) return;
+    pending = 0;
+    rpc('add_time', { device: deviceId(), secs }, closing).catch(() => { /* trudno, ta minuta przepadła */ });
+  };
+  window.setInterval(() => flush(), FLUSH_EVERY_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { flush(true); since = null; } else since = performance.now();
+  });
+  window.addEventListener('pagehide', () => flush(true));
 }
 
 let cached: VisitStats | null = null;
