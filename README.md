@@ -22,7 +22,7 @@ Uwaga: `npm install` nie działa bezpośrednio w `/mnt/project-files` (brak syml
 - `src/modes/siege/` – Oblężenie (sudoku + tower defense): `engine.ts` czysta logika (mury, wrogowie, fale, strzały, lasery, twierdze, ruiny), `view.ts` warstwa nad planszą z potworami i efektami, `siege.css` wygląd. Stan w `SavedGame.siege`. Zasady: `docs/oblezenie.md`.
 - `src/modes/sabotage/` – Sabotaż, gra we dwóch na dwóch telefonach: `engine.ts` czysta logika ataków (kolejka, ochrona przed podwójnym obrotem, kody pokoi), `view.ts` lobby, pasek rywala, odliczanie i efekty. Zasady: `docs/sabotaz.md`.
 - `src/daily/` – wyzwanie dnia: plansza wyznaczana z daty, notatka „dlaczego to wyzwanie”, kalendarz zrobionych dni i streak (zapis w localStorage). Zasady: `docs/wyzwania.md`.
-- Konto Google (opcjonalne): `src/net/account.ts` + `src/daily/sync.ts` synchronizują postęp wyzwań z Supabase. Konfiguracja i SQL: `docs/logowanie.md`, `supabase/daily_progress.sql`.
+- Konto (opcjonalne, mail + hasło): `src/net/account.ts` + `src/daily/sync.ts` synchronizują postęp wyzwań z Supabase. Konfiguracja i SQL: `docs/logowanie.md`, `supabase/daily_progress.sql`.
 - `src/net/` – pokoje multiplayer: Supabase Realtime (broadcast + presence, `config.ts` z publicznym kluczem), a z `?net=local` zamiennik na BroadcastChannel do testów na dwóch kartach.
 - `src/game/` – stan rozgrywki (`game.ts`: wpisywanie, notatki, cofanie, podpowiedzi, błędy) i zapis w localStorage (`storage.ts`: bieżąca gra + statystyki).
 - `src/ui/app.ts` – renderowanie planszy (9 kafli po 9 pól), klawiatura pod planszą i fizyczna, arkusze (nowa gra, ustawienia, wynik, statystyki).

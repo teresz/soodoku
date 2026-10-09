@@ -19,7 +19,7 @@ export interface DailyDeps {
   closeSheets: () => void;
   busy: (on: boolean) => void;
   formatTime: (ms: number) => string;
-  /** Pasek konta w kalendarzu (logowanie Google albo „postęp w chmurze”). */
+  /** Pasek konta w kalendarzu (zachęta do konta albo „postęp w chmurze”). */
   accountBanner: (el: HTMLElement) => void;
 }
 

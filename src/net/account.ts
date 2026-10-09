@@ -1,7 +1,7 @@
 import { GoTrueClient, type Session } from '@supabase/auth-js';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config';
 
-// Opcjonalne konto Google przez Supabase Auth. Bez logowania gra działa jak dotąd (postęp tylko w localStorage);
+// Opcjonalne konto (mail + hasło) przez Supabase Auth. Bez logowania gra działa jak dotąd (postęp tylko w localStorage);
 // po zalogowaniu postęp wyzwań dnia leci też do tabeli daily_progress (SQL w supabase/daily_progress.sql).
 
 export interface Account { id: string; name: string; email: string; avatar: string | null }
@@ -10,8 +10,8 @@ export interface Account { id: string; name: string; email: string; avatar: stri
 export interface ProgressRow { day: string; ms: number; mistakes: number; hints: number; on_time: boolean; done_on: string }
 
 /**
- * Logowanie ma sens tylko na zwykłej stronie (GitHub Pages, localhost). W Artifact (iframe)
- * i z pliku przekierowanie z Google nie ma dokąd wrócić, więc tam przycisku nie ma.
+ * Konto działa na zwykłej stronie (GitHub Pages, localhost). W Artifact (iframe) i z pliku go nie pokazujemy:
+ * tam zapytania do Supabase i tak by nie przeszły.
  */
 export function accountsAvailable(): boolean {
   try { return /^https?:$/.test(location.protocol) && window.top === window.self; } catch { return false; }
@@ -26,24 +26,14 @@ const auth = () => client ??= new GoTrueClient({
   storageKey: 'soodoku.auth',
   autoRefreshToken: true,
   persistSession: true,
-  detectSessionInUrl: true, // powrót z Google z ?code=… wymienia kod na sesję
-  flowType: 'pkce',
+  detectSessionInUrl: false,
 });
 
 const toAccount = (s: Session | null): Account | null => {
   if (!s) return null;
-  const m = (s.user.user_metadata ?? {}) as Record<string, string | undefined>;
-  return { id: s.user.id, name: m.full_name ?? m.name ?? s.user.email ?? '?', email: s.user.email ?? '', avatar: m.avatar_url ?? m.picture ?? null };
+  const email = s.user.email ?? '';
+  return { id: s.user.id, name: email.split('@')[0] || '?', email, avatar: null };
 };
-
-/** Zostawia w adresie tylko nasze parametry (np. ?pokoj=), bez śmieci po OAuth. */
-function cleanUrl() {
-  const url = new URL(location.href);
-  let dirty = false;
-  for (const k of ['code', 'error', 'error_code', 'error_description', 'state']) if (url.searchParams.has(k)) { url.searchParams.delete(k); dirty = true; }
-  if (url.hash.includes('access_token') || url.hash.includes('error')) { url.hash = ''; dirty = true; }
-  if (dirty) history.replaceState(history.state, '', url.toString());
-}
 
 /** Woła `fn` z bieżącym kontem od razu po starcie i przy każdym logowaniu, wylogowaniu i odświeżeniu sesji. */
 export function watchAccount(fn: (a: Account | null) => void) {
@@ -51,12 +41,40 @@ export function watchAccount(fn: (a: Account | null) => void) {
   auth().onAuthStateChange((_event, s) => {
     session = s;
     // Poza callbackiem: auth-js nie lubi, gdy w nim czeka się na kolejne wywołania.
-    window.setTimeout(() => { cleanUrl(); fn(toAccount(s)); }, 0);
+    window.setTimeout(() => fn(toAccount(s)), 0);
   });
 }
 
-export async function signIn() {
-  await auth().signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+/** Czemu logowanie się nie udało (klucze tekstów `account.err.*`). */
+export type AuthError = 'invalid' | 'exists' | 'weak' | 'email' | 'confirm' | 'rate' | 'network';
+
+function authError(e: unknown): AuthError {
+  const err = e as { code?: string; status?: number; message?: string } | null;
+  switch (err?.code) {
+    case 'invalid_credentials': return 'invalid';
+    case 'user_already_exists': case 'email_exists': return 'exists';
+    case 'weak_password': return 'weak';
+    case 'email_address_invalid': case 'validation_failed': return 'email';
+    case 'email_not_confirmed': return 'confirm';
+    case 'over_request_rate_limit': case 'over_email_send_rate_limit': return 'rate';
+  }
+  if (err?.status === 429) return 'rate';
+  if (err?.status === 400 && /password/i.test(err.message ?? '')) return 'weak';
+  return 'network';
+}
+
+/** Logowanie albo zakładanie konta. Zwraca null, gdy się udało, inaczej powód błędu. */
+export async function signInWithPassword(email: string, password: string, create: boolean): Promise<AuthError | null> {
+  try {
+    const { data, error } = create
+      ? await auth().signUp({ email, password })
+      : await auth().signInWithPassword({ email, password });
+    if (error) return authError(error);
+    // Z włączonym „Confirm email” Supabase zakłada konto bez sesji i czeka na kliknięcie w mailu.
+    return data.session ? null : 'confirm';
+  } catch (e) {
+    return authError(e);
+  }
 }
 
 export async function signOut() {

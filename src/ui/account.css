@@ -1,25 +1,27 @@
-/* Konto Google: przycisk w stylu Google (biały, czterokolorowe G), awatar i status synchronizacji. */
-.g-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 11px 18px; border-radius: 999px;
-  background: #fff; color: #1f1f1f; font-weight: 700; font-size: 14px; box-shadow: inset 0 0 0 1px #dadce0, 0 8px 18px -12px rgb(0 0 0 / .5);
-  transition: transform .2s var(--ease), box-shadow .2s;
-}
-.g-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: inset 0 0 0 1px #c6c9ce, 0 12px 22px -12px rgb(0 0 0 / .55); }
-.g-btn:disabled { opacity: .6; cursor: progress; }
-.g-logo { width: 18px; height: 18px; flex: none; }
-
+/* Konto: formularz mail + hasło, awatar z inicjałem i status synchronizacji. */
 .account { display: flex; flex-direction: column; gap: 10px; }
-.acc-pitch { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.acc-pitch, .acc-note { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.acc-note { font-size: 12px; }
+.acc-form { display: flex; flex-direction: column; gap: 8px; }
+.acc-input {
+  min-width: 0; border: 0; border-radius: 14px; padding: 13px 16px; background: var(--cell); color: var(--text);
+  font: 600 15px/1.2 var(--f-body); transition: box-shadow .15s;
+}
+.acc-input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.acc-input::placeholder { color: var(--muted); }
+.acc-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
+.acc-btns button:disabled { opacity: .6; cursor: progress; }
+.acc-error { margin: 0; padding: 9px 14px; border-radius: 14px; background: color-mix(in srgb, var(--danger) 14%, var(--cell)); color: var(--danger); font-weight: 600; font-size: 13px; line-height: 1.4; animation: shake .34s; }
+
 .acc-me { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 12px; border-radius: 18px; background: var(--cell); }
 .acc-who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .acc-who b { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .acc-who small { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .acc-avatar {
-  position: relative; width: 42px; height: 42px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; flex: none;
+  position: relative; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; flex: none;
   background: linear-gradient(135deg, var(--accent), var(--glow-b)); color: #fff; font-family: var(--f-display); font-size: 18px;
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent);
 }
-.acc-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 .acc-sync { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .acc-sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
@@ -32,7 +34,7 @@
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 18px; text-align: center;
   font-size: 13px; line-height: 1.4; font-weight: 600; color: var(--muted); background: color-mix(in srgb, var(--accent) 8%, var(--cell));
 }
+.cal-account .btn-accent { padding: 9px 16px; font-size: 13px; }
 .cal-account.in { justify-content: flex-start; text-align: left; background: var(--cell); }
 .cal-account.in .acc-avatar { width: 30px; height: 30px; font-size: 13px; }
 .cal-account.in .acc-sync { margin-left: auto; }
-.cal-account .g-btn { padding: 9px 16px; font-size: 13px; }

@@ -154,7 +154,7 @@ export function startApp(initial: SavedGame | null) {
     closeSheets: () => closeSheets(),
     busy: (on) => { $('busy').hidden = !on; },
     formatTime,
-    accountBanner: renderAccountBanner,
+    accountBanner: (el) => renderAccountBanner(el, openAccount),
   });
 
   // --- render ---
@@ -622,7 +622,7 @@ export function startApp(initial: SavedGame | null) {
   const TOGGLES: (keyof Settings)[] = ['checkMistakes', 'highlightPeers', 'highlightSame', 'autoClearNotes', 'showTimer', 'motion'];
 
   function renderSettings() {
-    renderAccountSettings($('account-label'), $('account-box'));
+    renderAccountSettings($('account-label'), $('account-box'), renderSettings);
     const dark = document.documentElement.style.colorScheme === 'dark';
     const themeList = $('theme-list');
     themeList.innerHTML = '';
@@ -666,6 +666,14 @@ export function startApp(initial: SavedGame | null) {
   function openSettings() {
     renderSettings();
     $('sheet-settings').hidden = false;
+  }
+
+  /** Z kalendarza: Ustawienia przewinięte do sekcji Konto. */
+  function openAccount() {
+    closeSheets();
+    openSettings();
+    $('account-label').scrollIntoView({ block: 'start' });
+    $('account-box').querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
   }
 
   function openStats() {
@@ -796,9 +804,9 @@ export function startApp(initial: SavedGame | null) {
   applyStatic();
   renderLang();
 
-  // Konto Google (opcjonalne): po zalogowaniu postęp wyzwań się synchronizuje, więc odświeżamy, co widać.
+  // Konto (opcjonalne, mail + hasło): po zalogowaniu postęp wyzwań się synchronizuje, więc odświeżamy, co widać.
   onSyncChange(() => {
-    if (!$('sheet-settings').hidden) renderAccountSettings($('account-label'), $('account-box'));
+    if (!$('sheet-settings').hidden) renderAccountSettings($('account-label'), $('account-box'), renderSettings);
     daily.refresh();
     if (screen === 'home') renderHome();
   });

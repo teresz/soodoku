@@ -1,4 +1,4 @@
--- Postęp wyzwań dnia dla zalogowanych graczy (opcjonalne konto Google).
+-- Postęp wyzwań dnia dla zalogowanych graczy (opcjonalne konto: mail + hasło).
 -- Uruchom raz w Supabase: SQL Editor → New query → wklej → Run. Można puścić ponownie, nic się nie zepsuje.
 
 create table if not exists public.daily_progress (
