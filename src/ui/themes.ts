@@ -52,13 +52,29 @@ export function themeVars(t: Theme, dark: boolean): Record<string, string> {
       };
 }
 
+/** „hsl(232 30% 96%)” → „#f2f3f8”. */
+export function hslToHex(color: string): string {
+  const m = /hsl\(\s*([\d.]+)\s+([\d.]+)%\s+([\d.]+)%\s*\)/.exec(color);
+  if (!m) return color;
+  const h = +m[1], s = +m[2] / 100, l = +m[3] / 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
 export function applyTheme(themeId: string, appearance: Appearance) {
   const dark = appearance === 'dark' || (appearance === 'auto' && systemDark());
   const vars = themeVars(getTheme(themeId), dark);
   const root = document.documentElement;
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
   root.style.colorScheme = dark ? 'dark' : 'light';
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', vars['--bg']);
+  // Pasek stanu (Android, przypięta strona) ma kolor tła motywu. Hex, bo nie każda przeglądarka łyka hsl() w theme-color.
+  // Oba warianty z media dostają ten sam kolor: o jasnym/ciemnym decyduje ustawienie w grze, nie system.
+  const bar = hslToHex(vars['--bg']);
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', bar));
 }
 
 /** Odświeżaj motyw, gdy zmieni się systemowy tryb albo przełącznik podglądu. */
