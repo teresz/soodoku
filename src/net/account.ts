@@ -132,3 +132,15 @@ export async function insertMatches(rows: MatchRow[]) {
     body: JSON.stringify(rows.map((r) => ({ ...r, user_id: userId }))),
   });
 }
+
+/** Funkcja w bazie (POST /rest/v1/rpc/…): jako zalogowany, a bez konta z samym kluczem anon. */
+export async function rpc<T>(name: string, body: unknown = {}): Promise<T | null> {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session?.access_token ?? SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`rpc ${name} ${r.status}`);
+  const text = await r.text();
+  return text ? (JSON.parse(text) as T) : null;
+}

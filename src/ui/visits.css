@@ -1,0 +1,14 @@
+.visits-box { display: flex; flex-direction: column; gap: 10px; padding-bottom: 6px; }
+.vs-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.vs-tile { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 20px; background: var(--cell); }
+.vs-tile.hot { color: var(--on-accent); background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--glow-b) 70%, var(--accent))); box-shadow: 0 18px 36px -22px var(--accent); }
+.vs-tile small { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.vs-tile b { font: 500 32px/1 var(--f-display); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.vs-tile span { font-size: 12px; font-weight: 600; opacity: .8; }
+.vs-chart { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: end; height: 96px; padding: 10px 10px 4px; border-radius: 18px; background: var(--cell); }
+.vs-bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+.vs-bar i { width: 100%; max-width: 16px; border-radius: 5px 5px 2px 2px; background: color-mix(in srgb, var(--accent) 45%, var(--cell)); transform-origin: bottom; animation: vs-grow .6s var(--ease) both; }
+.vs-bar.now i { background: var(--accent); box-shadow: 0 0 12px -2px var(--accent); }
+.vs-bar small { font-size: 9px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+@keyframes vs-grow { from { transform: scaleY(0); } }
+:root:not(.motion) .vs-bar i { animation: none; }
