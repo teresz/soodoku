@@ -30,3 +30,6 @@
 .sr-demo { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 12px; border-radius: 16px; background: color-mix(in srgb, var(--cell) 60%, transparent); }
 .sr-mini { --s: 26px; display: grid; grid-template-columns: repeat(3, var(--s)); gap: 3px; }
 .sr-mini .sr-cell { width: var(--s); height: var(--s); font-size: calc(var(--s) * .52); border-radius: 7px; }
+
+/* „Jak grać” zawsze nad innymi arkuszami, też nad dokładanym później lobby Sabotażu. */
+#sheet-rules { z-index: 11; }

@@ -29,6 +29,10 @@ Wybrane przez teresza spośród: Sabotaż, Wojna o pola, Wyścig duchów, Kooper
   Licznik nie spada do końca rundy, zeruje się dopiero w rewanżu.
 - **Wygrana**: kto pierwszy poprawnie wypełni planszę. Wyjście z gry albo zerwane połączenie na dłużej = wygrana drugiego.
 
+## Jak grać
+
+Arkusz „Jak grać” (`rules` w `src/modes/sabotage/index.ts`, wspólny `src/modes/rules.ts`): jak zacząć (pokój, kod, pasek rywala), ataki, zasady z rewanżem, schodki kary za złą cyfrę liczone z `SELF_PENALTY` i porady, PL+EN. Wyskakuje sam przy pierwszym wejściu do lobby (nie w trakcie meczu, bo zegar leci), potem przycisk „Jak grać” w lobby i ? w pasku gry. Arkusz ma z-index nad lobby, wcześniej chował się pod nim.
+
 ## Hamulce
 
 - Ataki trafiają do kolejki u ofiary i odpalają się po kolei, nie wszystkie naraz.
