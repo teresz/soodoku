@@ -13,3 +13,16 @@
 .vs-bar small { font-size: 9px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
 @keyframes vs-grow { from { transform: scaleY(0); } }
 :root:not(.motion) .vs-bar i { animation: none; }
+
+.accounts-box { margin-bottom: 6px; border-radius: 18px; background: var(--cell); overflow: hidden; }
+.accounts-box summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; font-weight: 800; }
+.accounts-box summary::-webkit-details-marker { display: none; }
+.accounts-box summary span { flex: 1; }
+.accounts-box summary b { min-width: 28px; padding: 3px 9px; border-radius: 999px; text-align: center; background: var(--accent); color: var(--on-accent); font: 500 14px/1.2 var(--f-display); }
+.accounts-box summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); rotate: 45deg; transition: rotate .25s var(--ease); }
+.accounts-box[open] summary::after { rotate: 225deg; }
+.accounts-box ul { list-style: none; margin: 0; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow: auto; }
+.accounts-box li { display: flex; flex-direction: column; gap: 2px; padding: 10px 10px; border-radius: 12px; background: var(--surface); }
+.acc-row-mail { font-weight: 700; font-size: 14px; overflow-wrap: anywhere; }
+.accounts-box li small, .accounts-box p { font-size: 12px; color: var(--muted); }
+.accounts-box p { margin: 0; padding: 0 16px 14px; }

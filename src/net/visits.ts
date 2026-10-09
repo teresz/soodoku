@@ -69,3 +69,18 @@ export async function fetchVisits(): Promise<VisitStats | null> {
   }
   return cached;
 }
+
+export interface AdminUser { email: string; created_at: string; last_sign_in_at: string | null }
+
+let cachedUsers: AdminUser[] | null = null;
+export const cachedAccounts = () => cachedUsers;
+
+/** Konta z mailami dla admina; null dla każdego innego albo gdy brak funkcji w bazie. */
+export async function fetchAccounts(): Promise<AdminUser[] | null> {
+  try {
+    cachedUsers = await rpc<AdminUser[]>('admin_users');
+  } catch {
+    cachedUsers = null;
+  }
+  return cachedUsers;
+}

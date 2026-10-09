@@ -2,7 +2,7 @@
 import './visits.css';
 import { locale, num, t } from '../i18n';
 import { addDays, dayKey, parseDay } from '../daily/daily';
-import type { VisitStats } from '../net/visits';
+import type { AdminUser, VisitStats } from '../net/visits';
 
 /** 0 min / 42 min / 3 h 05 min / 2 d 4 h */
 export function duration(secs: number) {
@@ -32,4 +32,22 @@ export function renderVisits(s: VisitStats | null): string {
     <div class="vs-tiles">${tile(t('visits.today'), s.today, 'hot')}${tile(t('visits.total'), s.total)}</div>
     <div class="vs-chart" aria-hidden="true">${bars}</div>
   </div>`;
+}
+
+const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+const when = (iso: string | null) => {
+  if (!iso) return '–';
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '–' : d.toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+/** Lista kont dla admina: rozwijana, najnowsze na górze. */
+export function renderAccounts(list: AdminUser[] | null, open: boolean): string {
+  if (!list) return '';
+  const rows = list.map((u) => `<li><span class="acc-row-mail">${esc(u.email)}</span>
+    <small>${t('accounts.joined', { d: when(u.created_at) })} · ${t('accounts.last', { d: when(u.last_sign_in_at) })}</small></li>`).join('');
+  return `<details class="accounts-box"${open ? ' open' : ''}>
+    <summary><span>${t('accounts.title')}</span><b>${num(list.length)}</b></summary>
+    ${list.length ? `<ul>${rows}</ul>` : `<p>${t('accounts.empty')}</p>`}
+  </details>`;
 }

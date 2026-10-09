@@ -29,4 +29,5 @@ Bez kroku 2 Supabase przy zakładaniu konta próbuje wysłać mail z linkiem, a 
 - Admin (mail w tabeli `site_admins`) widzi w Statystykach panel „Odwiedziny”: wejścia i urządzenia dziś, łącznie i słupki z 14 dni. Inni gracze dostają z serwera pustkę i panelu nie widzą.
 - SQL: `supabase/page_visits.sql` (w ostatniej linijce trzeba wpisać swój mail). Dzień liczony po czasie polskim.
 - Czas na stronie: gra liczy sekundy tylko, gdy karta jest na wierzchu, i dosyła je co minutę oraz przy schowaniu karty (`add_time`, najwyżej 120 s na raz). W panelu: ⏱ dziś i łącznie, w dymku słupka czas z danego dnia. SQL: `supabase/page_time.sql` (dokładka do page_visits.sql). Minuta, której nie zdążyło się wysłać przy zabiciu przeglądarki, przepada.
+- Lista kont: pod Odwiedzinami rozwijane „Konta graczy” (mail, kiedy założone, ostatnie logowanie), czytane z auth.users przez funkcję `admin_users` tylko dla adminów. SQL: `supabase/admin_users.sql`. To samo jest w Supabase: Authentication → Users.
 - Licznik da się podbić, wołając funkcję ręcznie, więc to liczba orientacyjna, a nie księgowość.
