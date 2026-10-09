@@ -17,6 +17,7 @@ import { cachedAccounts, cachedVisits, countVisit, fetchAccounts, fetchVisits } 
 import { renderAccountBanner, renderAccountSettings } from './account';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
 import { Settings, loadSettings, saveSettings } from './settings';
+import { createInstallGuide } from './install';
 import { Appearance, THEMES, applyTheme, themeVars, watchSystemTheme } from './themes';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -881,6 +882,10 @@ export function startApp(initial: SavedGame | null) {
   });
   applyStatic();
   renderLang();
+
+  // Wykrzyknik w rogu menu: poradnik przypinania do ekranu startowego.
+  const pin = createInstallGuide($('btn-pin'), $('sheet-pin'), $('pin-body'), $<HTMLButtonElement>('btn-pin-install'));
+  onLangChange(pin.refresh);
 
   // Konto (opcjonalne, mail + hasło): po zalogowaniu postęp wyzwań się synchronizuje, więc odświeżamy, co widać.
   onSyncChange(() => {
