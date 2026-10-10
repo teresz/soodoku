@@ -2,6 +2,8 @@
 
 Klasyczne sudoku jako responsywna gra webowa. Fundament pod kolejne tryby (sudoku+tetris, sudoku+saper…).
 
+Gra online: **https://soodoku.org** (Cloudflare Worker `soodoku`, wdraża się sam po każdym merge'u do `main`; konfiguracja w `wrangler.jsonc`). Zapasowo: teresz.github.io/soodoku.
+
 ## Uruchomienie
 
 ```bash
