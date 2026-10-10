@@ -5,5 +5,7 @@
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist"
-  }
+  },
+  // Podglądy PR-ów (`npx wrangler preview`) wymagają tego bloku, nawet pustego.
+  "previews": {}
 }
