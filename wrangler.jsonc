@@ -1,0 +1,9 @@
+// Cloudflare Worker „soodoku” (soodoku.org): serwuje gotowy build z dist/.
+// Workers Builds w panelu Cloudflare: build `npm run build`, deploy `npx wrangler deploy`.
+{
+  "name": "soodoku",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
