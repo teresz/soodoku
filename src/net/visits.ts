@@ -8,7 +8,7 @@ export interface VisitStats { today: VisitCount; total: VisitCount; days: { day:
 const DEVICE_KEY = 'soodoku.device';
 
 /** Losowy identyfikator przeglądarki: tylko po to, żeby odróżnić „ile osób” od „ile wejść”. */
-function deviceId() {
+export function deviceId() {
   try {
     let id = localStorage.getItem(DEVICE_KEY);
     if (!id) {
