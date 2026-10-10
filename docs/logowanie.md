@@ -31,3 +31,12 @@ Bez kroku 2 Supabase przy zakładaniu konta próbuje wysłać mail z linkiem, a 
 - Czas na stronie: gra liczy sekundy tylko, gdy karta jest na wierzchu, i dosyła je co minutę oraz przy schowaniu karty (`add_time`, najwyżej 120 s na raz). W panelu: ⏱ dziś i łącznie, w dymku słupka czas z danego dnia. SQL: `supabase/page_time.sql` (dokładka do page_visits.sql). Minuta, której nie zdążyło się wysłać przy zabiciu przeglądarki, przepada.
 - Lista kont: pod Odwiedzinami rozwijane „Konta graczy” (mail, kiedy założone, ostatnie logowanie), czytane z auth.users przez funkcję `admin_users` tylko dla adminów. SQL: `supabase/admin_users.sql`. To samo jest w Supabase: Authentication → Users.
 - Licznik da się podbić, wołając funkcję ręcznie, więc to liczba orientacyjna, a nie księgowość.
+
+## Ranking globalny (dla wszystkich)
+
+- W Statystykach na górze: top 10 dla każdego trybu i poziomu (Logika, Odkryte pola, Saperdoku, Oblężenie po czasie, Tetroku po punktach), plus „Twoje miejsce”, gdy gracz jest poza dziesiątką. Sabotaż i wyzwania dnia są poza rankingiem.
+- Liczy się tylko wygrana bez „Graj dalej bez limitu”. Każdy gracz ma w rankingu jeden wiersz na tryb i poziom: swój najlepszy wynik.
+- Gracz z kontem widnieje pod częścią maila przed @ (np. `jan.kowalski`), bez konta jako „Gość” / „Guest” w języku oglądającego. Gość jest rozpoznawany po losowym id przeglądarki (tym samym co w liczniku wejść).
+- Po wygranej ekran końca dostaje plakietkę z miejscem na świecie. Wynik, który nie doszedł (brak sieci), czeka w telefonie i leci przy następnym wejściu.
+- SQL: `supabase/leaderboard.sql` (funkcje `submit_score` i `leaderboard_top`, tabela bez bezpośredniego dostępu). Bez niego ranking pokazuje „chwilowo nie odpowiada”, a admin widzi podpowiedź, który plik puścić.
+- Serwer odrzuca czasy poniżej 10 s i bzdurne tryby, ale wynik da się podrobić, wołając funkcję ręcznie. Na hobbystyczny ranking wystarczy; gdyby ktoś zaczął oszukiwać, trzeba będzie sprawdzać rozwiązanie na serwerze.
