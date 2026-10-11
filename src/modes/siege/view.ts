@@ -1,6 +1,7 @@
 import { CELLS, UNITS } from '../../core/board';
 import type { Game, MoveResult } from '../../game/game';
 import { t as tr } from '../../i18n';
+import { buzz, play } from '../../ui/sound';
 import { FALLS_TO_LOSE, Foe, ShotEvent, SiegeEvent, levelOf, onMove, tick, waveOf } from './engine';
 
 // Widok Oblężenia: warstwa nad planszą z wrogami, murami, strzałami i laserami.
@@ -209,7 +210,6 @@ export function createSiegeView(deps: SiegeDeps) {
   }
 
   const quake = (strong = false) => { if (motion()) deps.animate(wrap, strong ? 'sg-quake-big' : 'sg-quake', 0, strong ? 600 : 400); };
-  const buzz = (ms: number) => { try { navigator.vibrate?.(ms); } catch { /* bez wibracji */ } };
 
   // --- zdarzenia silnika ---
   function handleEvents(events: SiegeEvent[]) {
@@ -236,6 +236,7 @@ export function createSiegeView(deps: SiegeDeps) {
         floatText(target.x, target.y, `−${ev.damage}`, ev.damage > 1 ? 'bad big' : 'bad');
         window.setTimeout(() => quake(ev.damage > 1), 300);
         buzz(60 * ev.damage);
+        window.setTimeout(() => play('hit'), 300);
         dirty = true;
       } else if (ev.type === 'fall') {
         const b = rectIn(boxes[ev.box].box);
@@ -244,6 +245,7 @@ export function createSiegeView(deps: SiegeDeps) {
         window.setTimeout(() => { particles(b.x, b.y, 22, 'rubble', 2.4); quake(true); }, 250);
         banner(tr('siege.fallen'), 'bad');
         buzz(250);
+        play('boom');
         dirty = true;
       } else if (ev.type === 'lost') {
         deps.commit();

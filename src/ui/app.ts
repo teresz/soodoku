@@ -9,6 +9,7 @@ import { createTetrokuView } from '../modes/tetroku/view';
 import { createSiegeView } from '../modes/siege/view';
 import { createSabotageView } from '../modes/sabotage/view';
 import { createDailyView } from '../daily/view';
+import { ShareInput, shareResult, shareText } from '../daily/share';
 import { currentStreak, dayKey, loadProgress, markDone } from '../daily/daily';
 import { currentAccount, matchSyncState, onSyncChange, pushDay, pushMatches, startSync } from '../daily/sync';
 import { addMatchRecord, renderRivals } from './rivals';
@@ -20,6 +21,7 @@ import { renderAccountBanner, renderAccountSettings } from './account';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
 import { Settings, loadSettings, saveSettings } from './settings';
 import { createInstallGuide } from './install';
+import { configureSound, play, setMusicVolume } from './sound';
 import { showAd } from '../ads/ads';
 import '../ads/ads.css';
 import { Appearance, THEMES, applyTheme, themeVars, watchSystemTheme } from './themes';
@@ -51,6 +53,8 @@ export function startApp(initial: SavedGame | null) {
     applyTheme(settings.theme, settings.appearance);
     document.documentElement.classList.toggle('motion', settings.motion);
     game.options = { checkMistakes: settings.checkMistakes, autoClearNotes: settings.autoClearNotes };
+    configureSound(settings);
+    setMusicVolume(settings.music);
   };
   applySettings();
   watchSystemTheme(() => { if (settings.appearance === 'auto') applyTheme(settings.theme, 'auto'); });
@@ -296,6 +300,7 @@ export function startApp(initial: SavedGame | null) {
     if (isSab()) sab.afterMove(i, r);
     if (r.boom) animate(i, 'blast', 0, 600);
     else if (r.wrong) animate(i, 'shake'); else animate(i, 'pop');
+    if (!r.won && !r.lost) play(r.boom ? 'boom' : r.wrong ? 'wrong' : r.completedUnits?.length ? 'unit' : 'place');
     for (const u of r.completedUnits ?? []) UNITS[u].forEach((j, k) => animate(j, 'flash', k * 45));
     persist();
     render();
@@ -304,11 +309,13 @@ export function startApp(initial: SavedGame | null) {
   }
 
   function celebrateWin() {
+    play('win');
     for (let j = 0; j < CELLS; j++) animate(j, 'flash', (rowOf(j) + colOf(j)) * 45);
     window.setTimeout(showWin, settings.motion ? 1100 : 100);
   }
 
   function lose() {
+    play('lose');
     recordResult(game.state.modeId, game.state.difficulty, false, game.state.elapsedMs, game.state.tetroku?.score);
     window.setTimeout(showLoss, 350);
   }
@@ -327,7 +334,7 @@ export function startApp(initial: SavedGame | null) {
     if (!notesMode && !forceNote && !game.state.tetroku && game.state.values[i] === d && !game.isGiven(i)) { erase(); return; }
     if (sab.blocked(notesMode || forceNote ? null : d)) { animate(keypadEl, 'shake', 0, 400); return; }
     if (notesMode || forceNote || game.state.tetroku) {
-      if (game.toggleNote(i, d).changed) { persist(); render(); }
+      if (game.toggleNote(i, d).changed) { play('note'); persist(); render(); }
       return;
     }
     handleResult(i, game.place(i, d));
@@ -335,7 +342,7 @@ export function startApp(initial: SavedGame | null) {
 
   function erase() {
     if (selected === null || paused) return;
-    if (game.erase(selected).changed) { persist(); render(); }
+    if (game.erase(selected).changed) { play('erase'); persist(); render(); }
   }
 
   function undo() {
@@ -558,7 +565,7 @@ export function startApp(initial: SavedGame | null) {
     lastTick = performance.now();
   }
 
-  function showEnd(won: boolean, sub: string, newBest = false, resigned = false) {
+  function showEnd(won: boolean, sub: string, newBest = false, resigned = false, share?: ShareInput) {
     const s = game.state;
     const sheet = $('sheet-end');
     (sheet.firstElementChild as HTMLElement).classList.toggle('lost', !won);
@@ -587,6 +594,19 @@ export function startApp(initial: SavedGame | null) {
       if (won) add(t('daily.end.calendar'), 'btn-accent', () => { showScreen('home'); daily.openCalendar(day); });
       else add(t('daily.retry'), resigned ? 'btn-accent' : 'btn-quiet', () => { showScreen('home'); daily.openDay(day); });
       add(t('end.menu'), 'btn-quiet', () => { closeSheets(); showScreen('home'); });
+      if (share) {
+        // Dyskretnie: mały link pod przyciskami, bez wyskakujących okien.
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'end-share';
+        b.innerHTML = `<span class="ico ico-share" aria-hidden="true"></span><span>${t('share.button')}</span>`;
+        b.addEventListener('click', async () => {
+          const res = await shareResult(shareText(share, { title: t('share.title'), time: formatTime }));
+          if (res === 'shared') return;
+          (b.lastElementChild as HTMLElement).textContent = t(res === 'copied' ? 'share.copied' : 'share.failed');
+          b.classList.add('done');
+        });
+        actions.appendChild(b);
+      }
     } else if (s.modeId === 'sabotage') {
       add(t('sab.end.rematch'), 'btn-accent', () => { sab.rematch(); });
       add(t('end.menu'), 'btn-quiet', () => { closeSheets(); showScreen('home'); });
@@ -608,9 +628,10 @@ export function startApp(initial: SavedGame | null) {
       const res = markDone(s.daily.day, dayKey(), { ms: s.elapsedMs, mistakes: s.mistakes, hints: s.hints });
       pushDay(s.daily.day);
       const rec = res.progress[s.daily.day];
+      const streak = currentStreakNow();
       const sub = !res.first ? t('daily.end.replay', { time: formatTime(rec.ms) })
-        : res.onTime ? t('daily.end.onTime', { n: currentStreakNow() }) : t('daily.end.late');
-      return showEnd(true, sub);
+        : res.onTime ? t('daily.end.onTime', { n: streak }) : t('daily.end.late');
+      return showEnd(true, sub, false, false, { day: s.daily.day, ms: s.elapsedMs, mistakes: s.mistakes, hints: s.hints, streak, onTime: res.onTime });
     }
     if (s.unlimited) return showEnd(true, t('end.unlimitedWin'));
     if (s.modeId === 'sabotage') {
@@ -678,9 +699,10 @@ export function startApp(initial: SavedGame | null) {
   }
 
   // Etykiety w i18n: toggle.<klucz> i toggle.<klucz>.hint.
-  const TOGGLES: (keyof Settings)[] = ['checkMistakes', 'highlightPeers', 'highlightSame', 'autoClearNotes', 'showTimer', 'motion'];
+  const TOGGLES: (keyof Settings)[] = ['checkMistakes', 'highlightPeers', 'highlightSame', 'autoClearNotes', 'showTimer', 'motion', 'sound', 'vibrate'];
 
   function renderSettings() {
+    musicLabel();
     renderAccountSettings($('account-label'), $('account-box'), renderSettings);
     const dark = document.documentElement.style.colorScheme === 'dark';
     const themeList = $('theme-list');
@@ -722,7 +744,19 @@ export function startApp(initial: SavedGame | null) {
     }
   }
 
+  const musicVol = $<HTMLInputElement>('music-vol');
+  // Bez przerysowania Ustawień przy każdym ruchu suwaka, żeby nie zgubić przeciągania.
+  musicVol.addEventListener('input', () => {
+    settings = { ...settings, music: Number(musicVol.value) };
+    saveSettings(settings);
+    setMusicVolume(settings.music);
+    musicLabel();
+  });
+
+  function musicLabel() { $('music-val').textContent = settings.music ? `${settings.music}%` : t('settings.musicOff'); }
+
   function openSettings() {
+    musicVol.value = String(settings.music);
     renderSettings();
     $('sheet-settings').hidden = false;
   }
