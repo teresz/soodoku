@@ -20,6 +20,8 @@ import { renderAccountBanner, renderAccountSettings } from './account';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
 import { Settings, loadSettings, saveSettings } from './settings';
 import { createInstallGuide } from './install';
+import { showAd } from '../ads/ads';
+import '../ads/ads.css';
 import { Appearance, THEMES, applyTheme, themeVars, watchSystemTheme } from './themes';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -456,6 +458,7 @@ export function startApp(initial: SavedGame | null) {
 
   function renderHome() {
     const s = game.state;
+    showAd($('ad-home'), 'home');
     const cont = $<HTMLButtonElement>('btn-continue');
     cont.hidden = !canContinue();
     if (canContinue()) {
