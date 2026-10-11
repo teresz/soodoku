@@ -1,12 +1,9 @@
-// Reklamy tylko poza rozgrywką: w menu i w okienku końca gry. Nigdy na planszy ani w trakcie meczu Sabotażu.
+// Reklama tylko na samym dole menu. Nigdy w grze, w okienkach ani w Sabotażu.
 // ?ads=demo pokazuje szare ramki w miejscach reklam (do podglądu układu bez konta AdSense).
 import { ADSENSE_CLIENT, AD_HOSTS, AD_SLOTS } from './config';
 import { t } from '../i18n';
 
 type Place = keyof typeof AD_SLOTS;
-
-// Okienko końca gry dostaje świeżą reklamę najwyżej co minutę, żeby szybkie „Jeszcze raz” nie mieliło odsłon.
-const END_REFRESH_MS = 60_000;
 
 export function adsMode(host = location.hostname, search = location.search): 'live' | 'demo' | 'off' {
   if (new URLSearchParams(search).get('ads') === 'demo') return 'demo';
@@ -25,17 +22,12 @@ function loadScript() {
   document.head.appendChild(s);
 }
 
-const lastFill = new Map<Place, number>();
-
 /** Wstawia (albo zostawia) reklamę w kontenerze. Bez konfiguracji nic nie robi i chowa kontener. */
 export function showAd(box: HTMLElement, place: Place) {
   const mode = adsMode();
   if (mode === 'off' || (mode === 'live' && !AD_SLOTS[place])) { box.hidden = true; return; }
   box.hidden = false;
-  const now = Date.now();
-  if (box.querySelector('ins, .ad-demo') && place === 'end' && now - (lastFill.get(place) ?? 0) < END_REFRESH_MS) return;
-  if (box.querySelector('ins, .ad-demo') && place === 'home') return;
-  lastFill.set(place, now);
+  if (box.querySelector('ins, .ad-demo')) return;
   box.innerHTML = `<span class="ad-label" data-i18n="ads.label">${t('ads.label')}</span>`;
   if (mode === 'demo') {
     box.insertAdjacentHTML('beforeend', `<div class="ad-demo">AdSense · ${place}</div>`);
@@ -47,7 +39,8 @@ export function showAd(box: HTMLElement, place: Place) {
   ins.style.display = 'block';
   ins.dataset.adClient = ADSENSE_CLIENT;
   ins.dataset.adSlot = AD_SLOTS[place];
-  ins.dataset.adFormat = place === 'end' ? 'rectangle' : 'auto';
+  // Poziomy pasek, żeby reklama nie rozpychała menu wielkim prostokątem.
+  ins.dataset.adFormat = 'horizontal';
   ins.dataset.fullWidthResponsive = 'true';
   box.appendChild(ins);
   try {

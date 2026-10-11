@@ -1,10 +1,9 @@
 # Reklamy (Google AdSense, wersja web)
 
 ## Gdzie są reklamy
-- **Menu**: jedna jednostka pod przyciskami Ustawienia/Statystyki.
-- **Okienko końca gry**: jedna jednostka pod przyciskami (żeby nie było przypadkowych kliknięć).
-  Nowa reklama najwyżej raz na minutę, szybkie „Jeszcze raz” nie mieli odsłon.
-- **Nigdzie w trakcie gry**: plansza, pauza, mecz Sabotażu i arkusze „Jak grać” są czyste.
+Jedna dyskretna reklama (poziomy pasek) **na samym dole menu**, pod Ustawieniami/Statystykami.
+Nigdzie indziej: plansza, pauza, koniec gry, mecz Sabotażu i arkusze „Jak grać” są czyste
+(decyzja teresza 2026-10-11: reklamy mają być dyskretne i nie psuć wyglądu).
 
 Reklamy ładują się tylko na `soodoku.org` i `www.soodoku.org`. Podglądy PR-ów, localhost
 i Artifact ich nie mają (Google nie lubi ruchu z cudzych domen i od developera).
@@ -17,11 +16,11 @@ Podgląd układu bez konta: dopisz `?ads=demo` do adresu, pojawią się szare ra
 3. **Prywatność i wiadomości → Europejskie przepisy**: utwórz komunikat o zgodzie (CMP Google, darmowy).
    Bez tego w EOG (czyli w Polsce) reklamy się nie wyświetlą. Kod nic tu nie potrzebuje,
    skrypt AdSense sam pokazuje baner zgody.
-4. **Reklamy → Według jednostki → Reklamy displayowe**: utwórz dwie jednostki, np. `menu` i `koniec-gry`
-   (format elastyczny). Podeślij ich numery `data-ad-slot`.
+4. **Reklamy → Według jednostki → Reklamy displayowe**: utwórz jedną jednostkę, np. `menu`
+   (format poziomy/elastyczny). Podeślij jej numer `data-ad-slot`.
 5. **Reklamy automatyczne zostaw wyłączone** – wcisnęłyby się na planszę w trakcie gry.
 
 ## Co wtedy zmieniam w kodzie
-- `src/ads/config.ts`: `ADSENSE_CLIENT = 'ca-pub-…'`, `AD_SLOTS.home`, `AD_SLOTS.end`.
+- `src/ads/config.ts`: `ADSENSE_CLIENT = 'ca-pub-…'`, `AD_SLOTS.home`.
 - `public/ads.txt`: linijka z punktu 2 (musi być pod `soodoku.org/ads.txt`).
 Po merge'u Cloudflare wdroży to sam; akceptacja strony w AdSense trwa zwykle od kilku dni do kilku tygodni.

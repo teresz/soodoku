@@ -597,7 +597,6 @@ export function startApp(initial: SavedGame | null) {
       add(t('end.continueUnlimited'), 'btn-accent', () => { game.continueAfterLoss(); closeSheets(); persist(); render(); });
       add(t('end.menu'), 'btn-quiet', () => { closeSheets(); showScreen('home'); });
     }
-    showAd($('ad-end'), 'end');
     sheet.hidden = false;
   }
 
