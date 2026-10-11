@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { adsMode } from '../src/ads/ads';
 
 describe('adsMode', () => {
-  it('bez ca-pub reklam nie ma nawet na soodoku.org', () => {
-    expect(adsMode('soodoku.org', '')).toBe('off');
+  it('na soodoku.org reklamy są włączone', () => {
+    expect(adsMode('soodoku.org', '')).toBe('live');
+    expect(adsMode('www.soodoku.org', '')).toBe('live');
   });
   it('podgląd PR-a i localhost nie dostają reklam', () => {
     expect(adsMode('soodoku.teresz.workers.dev', '')).toBe('off');

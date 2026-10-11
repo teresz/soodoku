@@ -25,6 +25,7 @@ function loadScript() {
 /** Wstawia (albo zostawia) reklamę w kontenerze. Bez konfiguracji nic nie robi i chowa kontener. */
 export function showAd(box: HTMLElement, place: Place) {
   const mode = adsMode();
+  if (mode === 'live') loadScript();
   if (mode === 'off' || (mode === 'live' && !AD_SLOTS[place])) { box.hidden = true; return; }
   box.hidden = false;
   if (box.querySelector('ins, .ad-demo')) return;
@@ -33,7 +34,6 @@ export function showAd(box: HTMLElement, place: Place) {
     box.insertAdjacentHTML('beforeend', `<div class="ad-demo">AdSense · ${place}</div>`);
     return;
   }
-  loadScript();
   const ins = document.createElement('ins');
   ins.className = 'adsbygoogle';
   ins.style.display = 'block';

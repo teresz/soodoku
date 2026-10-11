@@ -20,6 +20,10 @@ Podgląd układu bez konta: dopisz `?ads=demo` do adresu, pojawią się szare ra
    (format poziomy/elastyczny). Podeślij jej numer `data-ad-slot`.
 5. **Reklamy automatyczne zostaw wyłączone** – wcisnęłyby się na planszę w trakcie gry.
 
+## Stan (2026-10-11)
+Konto: `ca-pub-6505616545830186`, `public/ads.txt` gotowy, skrypt AdSense ładuje się na soodoku.org.
+Brakuje numeru jednostki (`AD_SLOTS.home`), więc reklama się jeszcze nie pokazuje.
+
 ## Co wtedy zmieniam w kodzie
 - `src/ads/config.ts`: `ADSENSE_CLIENT = 'ca-pub-…'`, `AD_SLOTS.home`.
 - `public/ads.txt`: linijka z punktu 2 (musi być pod `soodoku.org/ads.txt`).

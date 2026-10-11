@@ -1,8 +1,8 @@
-// Google AdSense. Dopóki ADSENSE_CLIENT jest pusty, reklam nie ma wcale (skrypt Google się nie ładuje).
-// Po akceptacji strony w AdSense: wpisz tu ca-pub-… i numery dwóch jednostek reklamowych,
-// a ten sam pub-… dopisz do public/ads.txt (instrukcja w docs/reklamy.md).
+// Google AdSense (konto teresza). Skrypt Google ładuje się na soodoku.org już teraz (weryfikacja strony,
+// baner zgody), ale reklama pojawi się dopiero po wpisaniu numeru jednostki w AD_SLOTS.home.
+// Ten sam pub-… siedzi w public/ads.txt (instrukcja w docs/reklamy.md).
 // Jedna dyskretna reklama na samym dole menu; w grze i w okienkach nie ma żadnej (życzenie teresza).
-export const ADSENSE_CLIENT = '';
+export const ADSENSE_CLIENT = 'ca-pub-6505616545830186';
 export const AD_SLOTS = {
   home: '', // na samym dole menu, pod Ustawieniami/Statystykami
 };
