@@ -2,6 +2,7 @@ import './tetroku.css';
 import { CELLS, UNITS, colOf, rowOf } from '../../core/board';
 import { HINT_LIMIT, type Game } from '../../game/game';
 import { locale, num, t as tr } from '../../i18n';
+import { play } from '../../ui/sound';
 import {
   Piece, PieceCell, fallTotal, footprint, hintFor, levelOf, multiplier, place, rotate, setCells, swapHold, tick,
 } from './engine';
@@ -192,6 +193,7 @@ export function createTetrokuView(deps: TetrokuDeps) {
     if (res.kind === 'invalid') return;
     if (res.kind === 'wrong') {
       res.cells.forEach((i) => deps.animate(i, 'shake'));
+      play('wrong');
       flyText(tr('tet.miss'), 'bad');
       checkLoss();
       deps.commit();
@@ -199,6 +201,7 @@ export function createTetrokuView(deps: TetrokuDeps) {
     }
     if (kbPiece >= t().queue.length) kbPiece = Math.max(0, t().queue.length - 1);
     if (res.won) g().state.status = 'won';
+    else play(res.units.length ? 'unit' : 'place');
     deps.commit();
     res.cells.forEach((i) => deps.animate(i, 'pop'));
     // Linie i kwadraty błyskają po kolei; combo dostaje napis.

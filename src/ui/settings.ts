@@ -9,6 +9,9 @@ export interface Settings {
   autoClearNotes: boolean; // wpisana cyfra czyści notatki sąsiadów
   showTimer: boolean;
   motion: boolean; // animacje i żywe tło
+  sound: boolean; // ciche dźwięki gry
+  vibrate: boolean; // wibracje przy błędach (telefony z Androidem)
+  music: number; // głośność muzyki w tle 0–100, 0 = wyłączona
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -20,6 +23,9 @@ export const DEFAULT_SETTINGS: Settings = {
   autoClearNotes: true,
   showTimer: true,
   motion: true,
+  sound: true,
+  vibrate: true,
+  music: 40,
 };
 
 const KEY = 'kratka.settings.v1';

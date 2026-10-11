@@ -67,13 +67,70 @@ begin
 end $$;
 grant execute on function public.submit_score(text, text, integer, integer, text) to anon, authenticated;
 
+-- Nicki graczy z kontem. Nick podaje się przy zakładaniu konta (stare konta: raz w Ustawieniach) i NIE da się go zmienić.
+-- Bez nicku w rankingu jest część maila przed @. Wielkość liter bez znaczenia przy sprawdzaniu, czy nick zajęty.
+-- Ta sama lista wulgaryzmów jest w src/net/nick.ts (szybka podpowiedź w formularzu); rozstrzyga ta tutaj.
+create table if not exists public.profiles (
+  user_id    uuid        primary key references auth.users (id) on delete cascade,
+  nick       text        not null check (nick ~ '^[A-Za-z0-9ĄĆĘŁŃÓŚŹŻąćęłńóśźż_.-]{3,16}$'),
+  created_at timestamptz not null default now()
+);
+alter table public.profiles enable row level security; -- tylko przez funkcje niżej
+create unique index if not exists profiles_nick_ci on public.profiles (lower(nick));
+
+-- 'ok', 'invalid' (znaki/długość), 'rude' (wulgaryzm) albo 'taken'. Woła to też formularz przed założeniem konta.
+create or replace function public.nick_check(p_nick text)
+returns text language plpgsql stable security definer set search_path = public as $$
+declare
+  n text := btrim(coalesce(p_nick, ''));
+  flat text;
+begin
+  if n !~ '^[A-Za-z0-9ĄĆĘŁŃÓŚŹŻąćęłńóśźż_.-]{3,16}$' then return 'invalid'; end if;
+  -- spłaszczenie: małe litery, bez ogonków, 0→o 1→i 3→e 4→a 5→s 7→t 8→b, bez kropek/kresek/podkreślników
+  flat := translate(lower(n), 'ąćęłńóśźż0134578', 'acelnoszzoieastb');
+  flat := regexp_replace(flat, '[^a-z]', '', 'g');
+  if flat ~ '(kurw|chuj|choj|huj|pierd|jeb|pizd|cipa|cipk|kutas|fiut|dziwk|szmat|pedal|pedzi|ciota|sukinsyn|skurw|cwel|zjeb|gowno|gowna|sraj|sran|srac|ruchac|ruchan|dupa|dupe|dupy|dupk|chwdp|hitler|nazi|fuck|fuk|shit|cunt|bitch|nigg|niga|fag|dick|cock|puss|whore|slut|rapist|asshole|bastard|penis|vagina|porn|sex)' then
+    return 'rude';
+  end if;
+  if exists (select 1 from profiles where lower(nick) = lower(n) and user_id is distinct from auth.uid()) then return 'taken'; end if;
+  return 'ok';
+end $$;
+grant execute on function public.nick_check(text) to anon, authenticated;
+
+-- Mój nick albo null.
+create or replace function public.my_nick()
+returns text language sql stable security definer set search_path = public as $$
+  select nick from profiles where user_id = auth.uid();
+$$;
+grant execute on function public.my_nick() to authenticated;
+
+-- Ustawia nick, tylko raz. Zwraca 'ok', 'locked' (nick już jest), 'signed_out' albo powód z nick_check.
+create or replace function public.set_nick(p_nick text)
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  n text := btrim(coalesce(p_nick, ''));
+  why text;
+begin
+  if uid is null then return 'signed_out'; end if;
+  if exists (select 1 from profiles where user_id = uid) then return 'locked'; end if;
+  why := nick_check(n);
+  if why <> 'ok' then return why; end if;
+  insert into profiles (user_id, nick) values (uid, n);
+  return 'ok';
+exception when unique_violation then
+  return case when exists (select 1 from profiles where user_id = uid) then 'locked' else 'taken' end;
+end $$;
+grant execute on function public.set_nick(text) to authenticated;
+
 -- Top 10 danego trybu i poziomu, plus miejsce pytającego (z konta albo z tej przeglądarki), także spoza dziesiątki.
 create or replace function public.leaderboard_top(p_mode text, p_level text, p_device text default null)
 returns json language sql stable security definer set search_path = public as $$
   with ranked as (
-    select name, ms, score, record_at, player,
-      rank() over (order by case when p_mode = 'tetris' then -score end, ms) as pos
-    from leaderboard where mode = p_mode and level = p_level
+    select coalesce(p.nick, l.name) as name, l.ms, l.score, l.record_at, l.player,
+      rank() over (order by case when p_mode = 'tetris' then -l.score end, l.ms) as pos
+    from leaderboard l left join profiles p on p.user_id = l.user_id
+    where l.mode = p_mode and l.level = p_level
   ), mine as (
     select * from ranked
     where player = 'u:' || coalesce(auth.uid()::text, '-') or player = 'd:' || coalesce(p_device, '-')

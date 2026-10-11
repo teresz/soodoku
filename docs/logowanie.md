@@ -38,5 +38,12 @@ Bez kroku 2 Supabase przy zakładaniu konta próbuje wysłać mail z linkiem, a 
 - Liczy się tylko wygrana bez „Graj dalej bez limitu”. Każdy gracz ma w rankingu jeden wiersz na tryb i poziom: swój najlepszy wynik.
 - Gracz z kontem widnieje pod częścią maila przed @ (np. `jan.kowalski`), bez konta jako „Gość” / „Guest” w języku oglądającego. Gość jest rozpoznawany po losowym id przeglądarki (tym samym co w liczniku wejść).
 - Po wygranej ekran końca dostaje plakietkę z miejscem na świecie. Wynik, który nie doszedł (brak sieci), czeka w telefonie i leci przy następnym wejściu.
-- SQL: `supabase/leaderboard.sql` (funkcje `submit_score` i `leaderboard_top`, tabela bez bezpośredniego dostępu). Bez niego ranking pokazuje „chwilowo nie odpowiada”, a admin widzi podpowiedź, który plik puścić.
+- SQL: `supabase/leaderboard.sql` (funkcje `submit_score` i `leaderboard_top`, tabela bez bezpośredniego dostępu, plus nicki: tabela `profiles` i funkcje `nick_check`, `set_nick`, `my_nick`). Po każdej zmianie tego pliku puść go jeszcze raz w całości. Bez niego ranking pokazuje „chwilowo nie odpowiada”, a admin widzi podpowiedź, który plik puścić.
 - Serwer odrzuca czasy poniżej 10 s i bzdurne tryby, ale wynik da się podrobić, wołając funkcję ręcznie. Na hobbystyczny ranking wystarczy; gdyby ktoś zaczął oszukiwać, trzeba będzie sprawdzać rozwiązanie na serwerze.
+
+## Nicki
+
+- Przy zakładaniu konta jest trzecie pole: nick (3–16 znaków: litery, cyfry, `.`, `-`, `_`). Stare konta ustawiają go raz w Ustawieniach → Konto.
+- Nicku nie da się zmienić (funkcja `set_nick` odmawia, gdy nick już jest). Admin może go usunąć ręcznie: `delete from profiles where nick = '...';`, wtedy gracz ustawi nowy.
+- Filtr wulgaryzmów (PL + EN, łapie też `k.u.r.w.4`, `ch0j` itp.) jest w `nick_check` w SQL i w kopii w `src/net/nick.ts`. Rozstrzyga SQL.
+- Ranking pokazuje nick, a bez nicku część maila przed @, jak wcześniej.
