@@ -1,0 +1,18 @@
+/* Wspólny wygląd stron „O grze” i „Prywatność” (zwykłe HTML-e obok gry, czytelne też bez JS). */
+:root { --bg: hsl(232 30% 96%); --surface: hsl(232 18% 99.5%); --text: hsl(232 18% 11%); --muted: hsl(232 12% 42%); --line: hsl(232 14% 88%); --accent: #3b4cff; color-scheme: light dark; }
+@media (prefers-color-scheme: dark) { :root { --bg: hsl(232 24% 6%); --surface: hsl(232 18% 10%); --text: hsl(232 9% 95%); --muted: hsl(232 12% 62%); --line: hsl(232 12% 22%); --accent: #7c8cff; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 Manrope, system-ui, sans-serif; }
+main { max-width: 720px; margin: 0 auto; padding: calc(28px + env(safe-area-inset-top, 0px)) 20px 56px; }
+.back { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px; }
+.back:hover { color: var(--accent); }
+.lang { float: right; font-size: 14px; color: var(--muted); }
+.lang a { color: inherit; }
+h1 { font-family: Unbounded, Manrope, sans-serif; font-weight: 500; font-size: clamp(28px, 6vw, 40px); line-height: 1.15; margin: 28px 0 8px; letter-spacing: -.01em; }
+h2 { font-family: Unbounded, Manrope, sans-serif; font-weight: 500; font-size: 20px; margin: 36px 0 8px; }
+.lead { color: var(--muted); font-size: 18px; margin-top: 0; }
+section.card { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 4px 22px 14px; margin: 14px 0; }
+section.card h2 { margin-top: 18px; }
+a { color: var(--accent); }
+.play { display: inline-block; margin-top: 28px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; padding: 13px 26px; border-radius: 999px; }
+footer { margin-top: 40px; color: var(--muted); font-size: 13px; }

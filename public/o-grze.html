@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@500&display=swap">
+<link rel="stylesheet" href="pages.css">
+<title>O grze i zasady trybów · soodoku</title>
+<meta name="description" content="soodoku to darmowe sudoku w przeglądarce z nietypowymi trybami: Tetroku, Saperdoku, Oblężenie i Sabotaż na dwa telefony. Zasady wszystkich trybów.">
+<link rel="alternate" hreflang="en" href="about.html">
+</head>
+<body>
+<main>
+  <a class="back" href="./">← soodoku</a><span class="lang"><a href="about.html" hreflang="en">English</a></span>
+  <h1>O grze</h1>
+  <p class="lead">soodoku to darmowe sudoku w przeglądarce, na telefonie i na komputerze. Obok klasyki ma tryby, w których sudoku łączy się z innymi grami: klockami, saperem, obroną zamków i pojedynkiem na dwa telefony.</p>
+  <p>Zasada bazowa jest wszędzie ta sama: plansza 9×9, w każdym wierszu, każdej kolumnie i każdym kwadracie 3×3 cyfry od 1 do 9 bez powtórzeń. Każda plansza ma dokładnie jedno rozwiązanie. Gra działa bez konta i bez instalacji, a postęp zapisuje się w przeglądarce. Możesz ją też przypiąć do ekranu startowego jak zwykłą aplikację.</p>
+
+  <section class="card"><h2>Logika</h2>
+  <p>Klasyczne sudoku, w którym poziom trudności zależy od technik potrzebnych do rozwiązania. Na łatwym wystarczą pojedyncze kandydaty, na trudniejszych trzeba szukać ukrytych pojedynczych, zablokowanych kandydatów i nagich par, a najtrudniejszy idzie jeszcze dalej. Masz notatki, cofanie i trzy podpowiedzi na grę.</p></section>
+
+  <section class="card"><h2>Odkryte pola</h2>
+  <p>Też klasyka, ale trudność to po prostu liczba cyfr na starcie: od 50 na najłatwiejszym do 23 na najtrudniejszym. Im mniej odkrytych pól, tym dłużej szukasz pierwszego ruchu.</p></section>
+
+  <section class="card"><h2>Tetroku</h2>
+  <p>Sudoku i klocki. Zamiast wpisywać cyfry pojedynczo, dostajesz klocki z cyframi z rozwiązania i przeciągasz je na planszę tam, gdzie pasują. Pasek u góry odlicza czas do kolejnego klocka, a jeden możesz odłożyć do schowka. Za szybkie i czyste ułożenia lecą punkty.</p></section>
+
+  <section class="card"><h2>Saperdoku</h2>
+  <p>Sudoku i saper. Pod częścią pustych pól leżą miny. Pod miną też jest cyfra z rozwiązania, ale zamiast ją wpisać, trzeba pole oflagować. Pola startowe i dobrze wpisane pokazują, ile min jest dookoła. Wygrywasz, gdy wszystkie bezpieczne pola są wypełnione, a wszystkie miny oznaczone. Generator pilnuje, żeby nigdy nie trzeba było zgadywać.</p></section>
+
+  <section class="card"><h2>Oblężenie</h2>
+  <p>Sudoku i obrona zamków. Każdy z dziewięciu kwadratów to zamek z murem, który szturmują potworki: zielone, pomarańczowe i fioletowe, coraz twardsze. Dobra cyfra w atakowanym kwadracie to strzał, pełny wiersz albo kolumna odpala laser, a pełny kwadrat zamienia się w twierdzę. Zła cyfra rani własny mur. Gdy padną trzy zamki, przegrywasz.</p></section>
+
+  <section class="card"><h2>Sabotaż (dwóch graczy)</h2>
+  <p>Pojedynek na dwa telefony. Zakładasz pokój z czteroliterowym kodem, wysyłasz koledze link i oboje dostajecie tę samą planszę. Kto pierwszy skończy, wygrywa. Pełny wiersz albo kolumna to atak na rywala (zakaz jednej cyfry albo rozmycie planszy), a pełny kwadrat obraca jego planszę o 90°. Za błędy są krótkie blokady, więc zgadywanie się nie opłaca.</p></section>
+
+  <section class="card"><h2>Wyzwanie dnia</h2>
+  <p>Codziennie jedna plansza, ta sama dla wszystkich, na zmianę z trybu Logika i Odkryte pola. Rozwiązane dni zaznaczają się w kalendarzu, a seria rośnie tylko za wyzwanie rozwiązane w swoim dniu.</p></section>
+
+  <h2>Konto i ranking</h2>
+  <p>Konto jest opcjonalne: mail i hasło wystarczą, żeby przenosić postęp wyzwań między urządzeniami, widzieć statystyki pojedynków z rywalami i pojawiać się w rankingu pod nazwą z maila. Bez konta grasz jako Gość.</p>
+
+  <a class="play" href="./">Zagraj</a>
+  <footer><a href="prywatnosc.html">Polityka prywatności</a> · <a href="https://github.com/teresz/soodoku">Kod gry na GitHubie</a></footer>
+</main>
+</body>
+</html>

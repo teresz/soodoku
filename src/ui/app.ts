@@ -907,6 +907,15 @@ export function startApp(initial: SavedGame | null) {
   applyStatic();
   renderLang();
 
+  // Stopka menu: zwykłe strony obok gry (public/), osobne pliki dla PL i EN.
+  const footLinks = () => {
+    const en = getLang() === 'en';
+    $<HTMLAnchorElement>('link-about').href = en ? 'about.html' : 'o-grze.html';
+    $<HTMLAnchorElement>('link-privacy').href = en ? 'privacy.html' : 'prywatnosc.html';
+  };
+  footLinks();
+  onLangChange(footLinks);
+
   // Wykrzyknik w rogu menu: poradnik przypinania do ekranu startowego.
   const pin = createInstallGuide($('btn-pin'), $('sheet-pin'), $('pin-body'), $<HTMLButtonElement>('btn-pin-install'));
   onLangChange(pin.refresh);
