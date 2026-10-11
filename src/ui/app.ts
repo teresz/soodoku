@@ -13,6 +13,8 @@ import { currentStreak, dayKey, loadProgress, markDone } from '../daily/daily';
 import { currentAccount, matchSyncState, onSyncChange, pushDay, pushMatches, startSync } from '../daily/sync';
 import { addMatchRecord, renderRivals } from './rivals';
 import { renderAccounts, renderVisits } from './visits';
+import { createLeaderboard } from './leaderboard';
+import { flushPending, submitScore } from '../net/leaderboard';
 import { cachedAccounts, cachedVisits, countVisit, fetchAccounts, fetchVisits } from '../net/visits';
 import { renderAccountBanner, renderAccountSettings } from './account';
 import { FLAGS, LANGS, Lang, applyStatic, getLang, num, onLangChange, setLang, t, tk } from '../i18n';
@@ -41,6 +43,7 @@ export function startApp(initial: SavedGame | null) {
   let screen: 'home' | 'game' = 'home';
   let lastTick = performance.now();
   let settings: Settings = loadSettings();
+  const ranking = createLeaderboard({ formatTime, signedIn: () => !!currentAccount(), isAdmin: () => !!cachedVisits() });
 
   const applySettings = () => {
     applyTheme(settings.theme, settings.appearance);
@@ -556,6 +559,7 @@ export function startApp(initial: SavedGame | null) {
     const s = game.state;
     const sheet = $('sheet-end');
     (sheet.firstElementChild as HTMLElement).classList.toggle('lost', !won);
+    $('end-rank')?.remove();
     $('end-title').textContent = s.modeId === 'sabotage' ? t(won ? 'sab.end.winTitle' : 'sab.end.loseTitle')
       : s.daily && !resigned ? t(won ? 'daily.end.wonTitle' : 'daily.end.lostTitle')
       : t(resigned ? 'end.over' : won ? (newBest ? 'end.record' : 'end.solved') : 'end.lost');
@@ -615,12 +619,26 @@ export function startApp(initial: SavedGame | null) {
       return showEnd(won, t(won ? 'sab.end.won' : 'sab.end.faster'));
     }
     const { stats, newBest } = recordResult(s.modeId, s.difficulty, true, s.elapsedMs, s.tetroku?.score);
+    submitToRanking(s);
     if (s.tetroku) {
       const sub = newBest ? t('end.bestScoreTetroku', { level: difficultyLabel(s.modeId, s.difficulty).toLowerCase() }) : t('end.recordScore', { score: num(stats.bestScore ?? 0) });
       return showEnd(true, sub, newBest);
     }
     const best = stats.bestMs !== null ? formatTime(stats.bestMs) : '–';
     showEnd(true, newBest ? t('end.bestTime', { mode: game.mode.name, level: difficultyLabel(s.modeId, s.difficulty).toLowerCase() }) : t('end.recordTime', { time: best }), newBest);
+  }
+  /** Wygrana leci do rankingu globalnego; gdy serwer odpowie, a ekran końca wciąż wisi, dokładamy plakietkę z miejscem. */
+  function submitToRanking(s: SavedGame) {
+    ranking.focus(s.modeId, s.difficulty);
+    void submitScore(s.modeId, s.difficulty, s.elapsedMs, s.tetroku?.score).then((r) => {
+      if (!r || $('sheet-end').hidden || game.state !== s) return;
+      $('end-rank')?.remove();
+      const p = document.createElement('p');
+      p.id = 'end-rank';
+      p.className = `end-rank${r.better && r.rank <= 3 ? ' top' : ''}`;
+      p.textContent = t(r.better ? 'lb.rankBest' : 'lb.rank', { n: num(r.rank), p: num(r.players) });
+      $('end-stats').before(p);
+    });
   }
   const currentStreakNow = () => currentStreak(loadProgress(), dayKey());
   const showLoss = () => showEnd(false, game.state.daily ? t('daily.end.loss') : t(game.state.tetroku ? 'end.lossTetroku' : game.state.saper ? 'end.lossSaper' : game.state.siege ? 'end.lossSiege' : 'end.loss'));
@@ -730,6 +748,9 @@ export function startApp(initial: SavedGame | null) {
     if (MODES.some((m) => m.id === 'sabotage' && m.available)) {
       $('stats-body').insertAdjacentHTML('afterbegin', renderRivals(currentAccount(), matchSyncState()));
     }
+    // Ranking globalny: widzą go wszyscy, także bez konta.
+    $('stats-body').insertAdjacentHTML('afterbegin', '<div id="lb-slot"></div>');
+    ranking.mount($('lb-slot'));
     // Licznik wejść: tylko admin (serwer innym oddaje null). Rysujemy, co znamy, i dociągamy świeże liczby.
     if (currentAccount()) {
       $('stats-body').insertAdjacentHTML('afterbegin', `<div id="visits-slot">${renderVisits(cachedVisits())}</div><div id="accounts-slot">${renderAccounts(cachedAccounts(), false)}</div>`);
@@ -896,6 +917,7 @@ export function startApp(initial: SavedGame | null) {
   });
   startSync();
   countVisit();
+  void flushPending();
 
   showScreen('home');
   window.setTimeout(warmUpGenerator, 1200);
