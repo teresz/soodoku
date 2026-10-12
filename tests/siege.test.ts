@@ -28,6 +28,24 @@ describe('Oblężenie', () => {
     expect(sg.walls[foe.box]).toBe(LEVELS[0].wall - 1);
   });
 
+  it('skasowanie i ponowny wpis tej samej cyfry nie strzela drugi raz', () => {
+    const g = Game.create('siege', 's2', 5);
+    const s = g.state, sg = s.siege!;
+    tick(s, 6000);
+    const foe = sg.foes[0];
+    foe.hp = foe.maxHp = 2;
+    const i = empty(g, foe.box);
+    g.place(i, s.solution[i]);
+    expect(onMove(s, i, true).shots[0]).toMatchObject({ type: 'shot', killed: false });
+    g.erase(i);
+    g.place(i, s.solution[i]);
+    expect(onMove(s, i, true).shots).toEqual([]);
+    expect(foe.hp).toBe(1);
+    // Laser za ukończoną jednostkę też tylko raz.
+    expect(onMove(s, empty(g, foe.box), true, [0]).shots.some((x) => x.type === 'laser')).toBe(true);
+    expect(onMove(s, empty(g, foe.box), true, [0]).shots.some((x) => x.type === 'laser')).toBe(false);
+  });
+
   it('dobra cyfra strzela w szturmującego, zła rani własny mur', () => {
     const g = Game.create('siege', 's2', 5);
     const s = g.state, sg = s.siege!;

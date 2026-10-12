@@ -56,6 +56,9 @@ export interface SiegeState {
   killed: number;
   nextId: number;
   draws: number; // licznik losowań (deterministyczny RNG: seed + draws)
+  /** Pola, które już strzeliły, i jednostki, które już dały laser/twierdzę: skasowanie i ponowny wpis nie strzela drugi raz. */
+  fired?: number[];
+  firedUnits?: number[];
 }
 
 /** Minimalny kawałek SavedGame, którego potrzebuje silnik. */
@@ -75,7 +78,7 @@ export function createSiege(level: string): SiegeState {
   const lv = levelOf(level);
   return {
     level: lv.id, walls: new Array(9).fill(lv.wall), fallen: [], ruins: [], foes: [],
-    spawnLeftMs: FIRST_SPAWN_MS, spawned: 0, killed: 0, nextId: 1, draws: 0,
+    spawnLeftMs: FIRST_SPAWN_MS, spawned: 0, killed: 0, nextId: 1, draws: 0, fired: [], firedUnits: [],
   };
 }
 
@@ -200,7 +203,7 @@ const kill = (s: SiegeState, f: Foe) => { s.foes = s.foes.filter((x) => x !== f)
 
 /**
  * Ruch gracza w polu i. Dobra cyfra strzela w najbliższego szturmującego ten kwadrat,
- * ukończone jednostki strzelają laserem. Zła cyfra rani własny mur.
+ * ukończone jednostki strzelają laserem (każde pole i każda jednostka tylko raz na grę). Zła cyfra rani własny mur.
  */
 export function onMove(b: Board, i: number, correct: boolean, completedUnits: number[] = []): { shots: ShotEvent[]; events: SiegeEvent[] } {
   const s = b.siege!;
@@ -214,13 +217,20 @@ export function onMove(b: Board, i: number, correct: boolean, completedUnits: nu
     }
     return { shots, events };
   }
-  const target = s.foes.filter((f) => f.box === box).sort((a, c) => a.leftMs - c.leftMs)[0];
+  // Strzela tylko nowa cyfra: pole, które już raz trafiło, po skasowaniu i ponownym wpisie milczy.
+  const fired = (s.fired ??= []);
+  const firstTime = !fired.includes(i);
+  if (firstTime) fired.push(i);
+  const target = firstTime ? s.foes.filter((f) => f.box === box).sort((a, c) => a.leftMs - c.leftMs)[0] : undefined;
   if (target) {
     target.hp--;
     if (target.hp <= 0) kill(s, target);
     shots.push({ type: 'shot', from: i, foe: target, killed: target.hp <= 0 });
   }
+  const firedUnits = (s.firedUnits ??= []);
   for (const u of completedUnits) {
+    if (firedUnits.includes(u)) continue;
+    firedUnits.push(u);
     if (u >= 18) {
       const foes = s.foes.filter((f) => f.box === u - 18);
       foes.forEach((f) => kill(s, f));
