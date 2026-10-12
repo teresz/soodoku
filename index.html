@@ -106,7 +106,12 @@
 
   <div class="mine-list" id="mine-list" hidden></div>
 
-  <div class="keypad" id="keypad"></div>
+  <div class="keypad" id="keypad">
+    <div class="autofill" id="autofill" hidden>
+      <button class="autofill-go" id="btn-autofill" type="button"><span class="ico ico-bolt"></span><b data-i18n="autofill.go">Autouzupełnij</b><small id="autofill-left"></small></button>
+      <button class="autofill-skip" id="btn-autofill-skip" type="button" data-i18n="autofill.skip">Wpiszę sam</button>
+    </div>
+  </div>
 
   <div class="tools" id="tools">
     <button class="tool" id="tool-undo" type="button"><span class="ico ico-undo"></span><span data-i18n="tool.undo">Cofnij</span></button>

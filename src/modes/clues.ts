@@ -1,4 +1,4 @@
-import { generateByClues } from '../core/generator';
+import { IMPOSSIBLE_CLUES, generateByClues, generateImpossibleClues } from '../core/generator';
 import { t } from '../i18n';
 import { GameMode } from './types';
 
@@ -20,7 +20,11 @@ export const cluesMode: GameMode = {
   available: true,
   mistakeLimit: 3,
   get difficulties() {
-    return LEVELS.map(([lvl, n]) => ({ id: `c${n}`, label: t(`lvl.${lvl}`), hint: t('lvl.digits', { n }) }));
+    return [
+      ...LEVELS.map(([lvl, n]) => ({ id: `c${n}`, label: t(`lvl.${lvl}`), hint: t('lvl.digits', { n }) })),
+      // Niemożliwy: najmniej cyfr i do tego plansza, której nie da się zrobić bez ciężkich technik.
+      { id: 'impossible', label: t('lvl.impossible'), hint: t('lvl.digits', { n: IMPOSSIBLE_CLUES }) },
+    ];
   },
-  createPuzzle: (difficulty, seed) => generateByClues(Number(difficulty.slice(1)) || 36, seed),
+  createPuzzle: (difficulty, seed) => (difficulty === 'impossible' ? generateImpossibleClues(seed) : generateByClues(Number(difficulty.slice(1)) || 36, seed)),
 };

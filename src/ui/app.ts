@@ -28,6 +28,10 @@ import { Appearance, THEMES, applyTheme, themeVars, watchSystemTheme } from './t
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
+/** Autouzupełnianie: tylko klasyczne sudoku (też wyzwanie dnia), od tylu pustych pól w dół. */
+const AUTOFILL_MODES = ['classic', 'clues'];
+const AUTOFILL_MAX = 10;
+
 
 export const formatTime = (ms: number) => {
   const t = Math.floor(ms / 1000);
@@ -36,14 +40,19 @@ export const formatTime = (ms: number) => {
   return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 };
 
+/** Na start gry zaznaczamy pierwsze pole z cyfrą startową (od lewej, od góry), a nie lewy górny róg, który bywa pusty. */
+const firstGiven = (g: Game) => g.state.puzzle.findIndex((v) => v !== 0);
+
 export function startApp(initial: SavedGame | null) {
   const saved = initial ?? loadGame();
   let game = new Game(saved ?? Game.blank());
-  let selected: number | null = game.state.tetroku ? -1 : game.state.values.findIndex((v) => !v);
+  let selected: number | null = game.state.tetroku ? -1 : firstGiven(game);
   if (selected < 0) selected = null;
   let notesMode = false;
   let flagMode = false; // Saperdoku: tap w pole stawia flagę
   let paused = false;
+  let filling = false; // autouzupełnianie właśnie wpisuje resztę
+  let autofillSkipped = false; // gracz wybrał „Wpiszę sam” w tej grze
   let screen: 'home' | 'game' = 'home';
   let lastTick = performance.now();
   let settings: Settings = loadSettings();
@@ -219,6 +228,7 @@ export function startApp(initial: SavedGame | null) {
       (k.querySelector('small') as HTMLElement).textContent = String(9 - counts[d]);
     });
     renderMines();
+    renderAutofill();
     keypadEl.classList.toggle('notes-on', notesMode);
     $('meta-diff').textContent = difficultyLabel(s.modeId, s.difficulty);
     const limit = game.mistakeLimit;
@@ -272,6 +282,45 @@ export function startApp(initial: SavedGame | null) {
       return `<b class="${k >= 0 ? 'off' : ''}">${d}</b>`;
     }).join('');
   }
+  /** Pola do autouzupełnienia; null = przycisk się nie należy (tryb, ustawienie, błędy na planszy, za dużo pustych). */
+  function autofillCells(): number[] | null {
+    const s = game.state;
+    if (!settings.autofill || !AUTOFILL_MODES.includes(s.modeId) || s.status !== 'playing' || isSab()) return null;
+    const left: number[] = [];
+    for (let i = 0; i < CELLS; i++) {
+      if (s.values[i] === s.solution[i]) continue;
+      if (s.values[i]) return null; // błędna cyfra na planszy: najpierw popraw
+      left.push(i);
+    }
+    return left.length && left.length <= AUTOFILL_MAX ? left : null;
+  }
+
+  function renderAutofill() {
+    const left = filling || autofillSkipped || paused ? null : autofillCells();
+    const box = $('autofill');
+    if (left && box.hidden) animate(box, 'show', 0, 400);
+    box.hidden = !left;
+    keypadEl.classList.toggle('af-on', !!left);
+    if (left) $('autofill-left').textContent = t('autofill.left', { n: left.length });
+  }
+
+  /** Wpisuje resztę po kolei, z tymi samymi efektami co ręczne wpisywanie; zegar stoi. */
+  function autofill() {
+    const left = autofillCells();
+    if (!left || filling || paused) return;
+    filling = true;
+    selected = null;
+    render();
+    const step = settings.motion ? 110 : 0;
+    const g = game;
+    left.forEach((i, n) => window.setTimeout(() => {
+      if (!filling || game !== g || g.state.status !== 'playing') return;
+      const r = game.place(i, game.state.solution[i]);
+      if (n === left.length - 1 || r.won) filling = false;
+      handleResult(i, r);
+    }, n * step));
+  }
+
   const renderTime = () => { $('meta-time').textContent = formatTime(game.state.elapsedMs); };
 
   // --- efekty ---
@@ -322,13 +371,13 @@ export function startApp(initial: SavedGame | null) {
 
   // --- akcje ---
   function select(i: number) {
-    if (paused || screen !== 'game') return;
+    if (paused || filling || screen !== 'game') return;
     selected = i;
     render();
   }
 
   function input(d: number, forceNote = false) {
-    if (selected === null || paused) return;
+    if (selected === null || paused || filling) return;
     const i = selected;
     // Ta sama cyfra co w polu = gumka (klawiatura pod planszą i klawisz na PC).
     if (!notesMode && !forceNote && !game.state.tetroku && game.state.values[i] === d && !game.isGiven(i)) { erase(); return; }
@@ -341,18 +390,18 @@ export function startApp(initial: SavedGame | null) {
   }
 
   function erase() {
-    if (selected === null || paused) return;
+    if (selected === null || paused || filling) return;
     if (game.erase(selected).changed) { play('erase'); persist(); render(); }
   }
 
   function undo() {
-    if (paused || !game.undo()) return;
+    if (paused || filling || !game.undo()) return;
     persist();
     render();
   }
 
   function hint() {
-    if (paused || isSab() || game.hintsLeft === 0) return;
+    if (paused || filling || isSab() || game.hintsLeft === 0) return;
     if (game.state.tetroku) { tet.hint(); return; }
     const h = game.hint(selected);
     if (!h) return;
@@ -383,10 +432,12 @@ export function startApp(initial: SavedGame | null) {
     closeSheets();
     game = Game.create(modeId, difficulty, seed);
     applySettings();
-    selected = game.state.values.findIndex((v) => !v);
+    selected = firstGiven(game);
     notesMode = false;
     flagMode = false;
     paused = false;
+    filling = false;
+    autofillSkipped = false;
     lastTick = performance.now();
     showScreen('game');
   }
@@ -430,11 +481,13 @@ export function startApp(initial: SavedGame | null) {
     game = next;
     applySettings();
     // W Tetroku nic nie zaznaczamy na start: plansza ma być czysta pod klocki.
-    selected = game.state.tetroku ? null : game.state.values.findIndex((v) => !v);
+    selected = game.state.tetroku ? null : firstGiven(game);
     if (selected !== null && selected < 0) selected = null;
     notesMode = false;
     flagMode = false;
     paused = false;
+    filling = false;
+    autofillSkipped = false;
     lastTick = performance.now();
     persist();
     showScreen('game');
@@ -451,7 +504,7 @@ export function startApp(initial: SavedGame | null) {
       sab.leave();
       game = new Game(loadGame() ?? Game.blank());
       applySettings();
-      selected = game.state.tetroku ? null : game.state.values.findIndex((v) => !v);
+      selected = game.state.tetroku ? null : firstGiven(game);
       if (selected !== null && selected < 0) selected = null;
     }
     screen = next;
@@ -509,7 +562,7 @@ export function startApp(initial: SavedGame | null) {
     m.difficulties.forEach((d, level) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'diff';
+      b.className = d.id === 'impossible' ? 'diff impossible' : 'diff';
       const bars = m.difficulties.map((_, n) => `<i${n <= level ? ' class="on"' : ''}></i>`).join('');
       b.innerHTML = `<span class="bars">${bars}</span><b></b><small></small>`;
       (b.querySelector('b') as HTMLElement).textContent = d.label;
@@ -686,7 +739,7 @@ export function startApp(initial: SavedGame | null) {
   }
 
   // Etykiety w i18n: toggle.<klucz> i toggle.<klucz>.hint.
-  const TOGGLES: (keyof Settings)[] = ['checkMistakes', 'highlightPeers', 'highlightSame', 'autoClearNotes', 'showTimer', 'motion', 'sound', 'vibrate'];
+  const TOGGLES: (keyof Settings)[] = ['checkMistakes', 'highlightPeers', 'highlightSame', 'autoClearNotes', 'autofill', 'showTimer', 'motion', 'sound', 'vibrate'];
 
   function renderSettings() {
     musicLabel();
@@ -792,6 +845,8 @@ export function startApp(initial: SavedGame | null) {
   $('tool-erase').addEventListener('click', erase);
   $('tool-notes').addEventListener('click', toggleNotes);
   $('tool-hint').addEventListener('click', hint);
+  $('btn-autofill').addEventListener('click', autofill);
+  $('btn-autofill-skip').addEventListener('click', () => { autofillSkipped = true; render(); });
   $('tool-flag').addEventListener('click', toggleFlagMode);
   $('btn-pause').addEventListener('click', () => setPaused(!paused));
   $('btn-resume').addEventListener('click', () => setPaused(false));
@@ -888,7 +943,7 @@ export function startApp(initial: SavedGame | null) {
     const now = performance.now();
     const dt = now - lastTick;
     lastTick = now;
-    if (screen !== 'game' || paused || game.state.status !== 'playing' || document.hidden || !$('sheet-rules').hidden) return;
+    if (screen !== 'game' || paused || filling || game.state.status !== 'playing' || document.hidden || !$('sheet-rules').hidden) return;
     game.state.elapsedMs += Math.min(dt, 2000);
     renderTime();
     if (Math.floor(game.state.elapsedMs / 5000) !== Math.floor((game.state.elapsedMs - dt) / 5000)) persist();
