@@ -97,7 +97,7 @@ export function createDailyView(deps: DailyDeps) {
 
   function renderDay(ch: Challenge, g: Game) {
     const day = ch.day;
-    if (!notes.has(`${day}:${getLang()}`)) notes.set(`${day}:${getLang()}`, buildNote(ch, g.state));
+    if (!notes.has(`${day}:${getLang()}`)) notes.set(`${day}:${getLang()}`, buildNote(ch));
     const p = loadProgress();
     const rec = p[day];
     const st = stateOf(p, day);
