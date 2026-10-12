@@ -16,6 +16,13 @@ const start = (data: { game?: SavedGame } = {}) => {
 if (hot?.ready) hot.ready(start);
 else start(hot?.data ?? {});
 
+// Bez przybliżania. iOS Safari ignoruje user-scalable=no z meta viewport, więc pinch blokujemy ręcznie
+// (dwuklik załatwia touch-action: manipulation w CSS; preventDefault na touchend zjadałby szybkie stuknięcia w cyfry).
+const noZoom = (e: Event) => e.preventDefault();
+document.addEventListener('gesturestart', noZoom, { passive: false });
+document.addEventListener('gesturechange', noZoom, { passive: false });
+document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
 // Motyw już nałożony: od teraz zmiany tła mogą płynnie przenikać.
 requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.add('ready')));
 
