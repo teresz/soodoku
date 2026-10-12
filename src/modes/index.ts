@@ -17,9 +17,10 @@ export const comingSoon = (id: string): GameMode => ({
   createPuzzle: () => { throw new Error(`Tryb ${id} jeszcze nie istnieje`); },
 });
 
+// Standard (liczba cyfr na start) jest głównym trybem: pierwszy, duży kafel w menu.
 export const MODES: GameMode[] = [
-  classic,
   cluesMode,
+  classic,
   tetroku,
   saperdoku,
   siege,

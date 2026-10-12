@@ -26,7 +26,7 @@
 .dc-date b { flex: 1; display: grid; place-items: center; font-family: var(--f-display); font-weight: 500; font-size: 26px; letter-spacing: -.04em; }
 .dc-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .dc-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; color: var(--accent); }
-.dc-info strong { font-family: var(--f-display); font-weight: 500; font-size: 17px; letter-spacing: -.03em; line-height: 1.15; }
+.dc-info strong { font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: -.04em; line-height: 1.15; }
 .dc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
 .dc-tags em, .dl-tags > span {
   font-style: normal; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; padding: 4px 8px; border-radius: 999px;

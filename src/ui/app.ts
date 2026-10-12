@@ -482,6 +482,7 @@ export function startApp(initial: SavedGame | null) {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'mode-card';
+      b.dataset.mode = m.id;
       b.disabled = !m.available;
       b.innerHTML = `<span class="mc-top"><strong></strong><em></em></span><span class="mc-desc"></span>${
         m.available ? `<span class="mc-levels">${m.difficulties.map(() => '<i></i>').join('')}</span>` : ''}`;
@@ -492,20 +493,6 @@ export function startApp(initial: SavedGame | null) {
       list.appendChild(b);
     }
   }
-
-  // Logo w menu: 3x3 kafelki, akcent przeskakuje po polach.
-  const heroMark = $('hero-mark');
-  const heroTiles = [...Array(9)].map(() => heroMark.appendChild(document.createElement('i')));
-  let heroOn = 4;
-  heroTiles[heroOn].className = 'on';
-  window.setInterval(() => {
-    if (screen !== 'home' || !settings.motion) return;
-    heroTiles[heroOn].className = '';
-    let next = heroOn;
-    while (next === heroOn) next = Math.floor(Math.random() * 9);
-    heroOn = next;
-    heroTiles[heroOn].className = 'on';
-  }, 1400);
 
   // --- arkusze ---
   function closeSheets() { document.querySelectorAll<HTMLElement>('.overlay').forEach((o) => (o.hidden = true)); }

@@ -36,7 +36,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"soodoku","url":"https://soodoku.org/","image":"https://soodoku.org/og.png","description":"Darmowe sudoku w przeglądarce z trybami Tetroku, Saperdoku, Oblężenie i Sabotaż 1v1.","genre":["Puzzle","Sudoku"],"gamePlatform":["Web browser","Android","iOS"],"applicationCategory":"Game","operatingSystem":"Any","inLanguage":["pl","en"],"offers":{"@type":"Offer","price":"0","priceCurrency":"PLN"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@300;400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@300;400;500;700&display=swap">
 </head>
 <body>
 <div class="ambient" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
@@ -47,7 +47,6 @@
     <div class="lang-switch" id="lang-home" role="radiogroup" aria-label="Język" data-i18n-aria="lang.label"></div>
   </div>
   <div class="hero">
-    <div class="hero-mark" id="hero-mark" aria-hidden="true"></div>
     <h1 class="hero-title">soodoku</h1>
     <p class="hero-sub" data-i18n="app.sub">Sudoku, które nie wygląda jak sudoku.</p>
   </div>
@@ -58,7 +57,7 @@
     <span class="continue-meta" id="continue-meta"></span>
   </button>
   <div class="daily-card" id="daily-card"></div>
-  <p class="section-label" data-i18n="home.modes">Tryby</p>
+  <h2 class="sr-only" data-i18n="home.modes">Tryby</h2>
   <div class="mode-cards" id="mode-cards"></div>
   <div class="home-actions">
     <button class="home-btn" id="home-settings" type="button"><span class="ico ico-gear"></span><span data-i18n="home.settings">Ustawienia</span></button>

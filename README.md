@@ -19,7 +19,7 @@ Uwaga: `npm install` nie działa bezpośrednio w `/mnt/project-files` (brak syml
 ## Struktura
 
 - `src/core/` – czysta logika, bez DOM: plansza i geometria (`board.ts`), solver z backtrackingiem na maskach bitowych (`solver.ts`), „ludzki” solver do oceny trudności i podpowiedzi (`logic.ts`), generator z seedem (`generator.ts`), RNG (`rng.ts`).
-- `src/modes/` – tryby gry. `GameMode` to kontrakt (każdy tryb ma własną drabinkę poziomów); `classic.ts` („Logika”, trudność wg technik), `clues.ts` („Odkryte pola”, trudność wg liczby cyfr), `index.ts` trzyma rejestr (Saperoku jest na razie zapowiedzią w menu).
+- `src/modes/` – tryby gry. `GameMode` to kontrakt (każdy tryb ma własną drabinkę poziomów); `classic.ts` („Logika”, trudność wg technik), `clues.ts` („Standard”, trudność wg liczby cyfr), `index.ts` trzyma rejestr (Saperoku jest na razie zapowiedzią w menu).
 - `src/modes/tetroku/` – Tetroku (sudoku + tetris, wariant „Układanka”): `engine.ts` to czysta logika (cięcie planszy na klocki, kolejka, schowek, punkty, pasek opadania), `view.ts` tacka z klockami, przeciąganie i klawiatura, `tetroku.css` jej wygląd. Stan siedzi w `SavedGame.tetroku`. Opis zasad: `docs/tetroku.md`.
 - `src/modes/siege/` – Oblężenie (sudoku + tower defense): `engine.ts` czysta logika (mury, wrogowie, fale, strzały, lasery, twierdze, ruiny), `view.ts` warstwa nad planszą z potworami i efektami, `siege.css` wygląd. Stan w `SavedGame.siege`. Zasady: `docs/oblezenie.md`.
 - `src/modes/sabotage/` – Sabotaż, gra we dwóch na dwóch telefonach: `engine.ts` czysta logika ataków (kolejka, ochrona przed podwójnym obrotem, kody pokoi), `view.ts` lobby, pasek rywala, odliczanie i efekty. Zasady: `docs/sabotaz.md`. Statystyki z rywalami (po mailu, gdy obaj zalogowani): `matches.ts` + `src/ui/rivals.ts`, tabela `supabase/sabotage_matches.sql`.
@@ -46,7 +46,7 @@ Generator zdejmuje cyfry symetrycznie, pilnując jednego rozwiązania, a potem o
 - Trudny: potrzeba zablokowanych kandydatów lub nagich par.
 - Ekspert: proste techniki nie wystarczają, ≤25 cyfr.
 
-Tryb „Odkryte pola” (`src/modes/clues.ts`, `generateByClues`) liczy trudność tylko po liczbie cyfr na start: 50, 42, 36, 30, 26, 23. Cyfry zdejmowane są bez symetrii, plansza zawsze ma jedno rozwiązanie.
+Tryb „Standard” (`src/modes/clues.ts`, `generateByClues`) liczy trudność tylko po liczbie cyfr na start: 50, 42, 36, 30, 26, 23. Cyfry zdejmowane są bez symetrii, plansza zawsze ma jedno rozwiązanie.
 
 ## Jak dodać nowy tryb
 

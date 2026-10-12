@@ -4,7 +4,7 @@ import { accountsAvailable, rpc } from './account';
 import { deviceId } from './visits';
 
 /** Tryby z rankingiem: Sabotaż (mecz 1v1) i wyzwania dnia zostają poza nim. */
-export const RANKED_MODES = ['classic', 'clues', 'tetris', 'minesweeper', 'siege'];
+export const RANKED_MODES = ['clues', 'classic', 'tetris', 'minesweeper', 'siege'];
 export const byScore = (modeId: string) => modeId === 'tetris';
 
 export interface BoardRow { pos: number; name: string | null; ms: number; score: number | null; at: string; me: boolean }
