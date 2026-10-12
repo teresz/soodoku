@@ -23,7 +23,7 @@ export interface Challenge {
   flavor: number;
 }
 
-// Wyzwania są tylko z klasycznego sudoku (decyzja teresza): Logika i Odkryte pola, na zmianę.
+// Wyzwania są tylko z klasycznego sudoku (decyzja teresza): Logika i Standard, na zmianę.
 // Kolejność id = kolejność poziomów.
 export const DAILY_MODES: { id: string; levels: string[] }[] = [
   { id: 'classic', levels: ['easy', 'medium', 'hard', 'expert'] },

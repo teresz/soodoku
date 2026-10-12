@@ -18,7 +18,7 @@ describe('wyzwanie dnia', () => {
     expect(challengeFor('2026-10-09').seed).not.toBe(challengeFor('2026-10-10').seed);
   });
 
-  it('tylko klasyczne sudoku (Logika i Odkryte pola), na zmianę', () => {
+  it('tylko klasyczne sudoku (Logika i Standard), na zmianę', () => {
     let prev = '';
     for (let k = 0; k < 200; k++) {
       const ch = challengeFor(addDays(DAILY_START, k));

@@ -5,7 +5,7 @@ Codziennie jedna plansza, ta sama dla wszystkich graczy. Kod: `src/daily/` (`dai
 ## Skąd się bierze wyzwanie
 
 - Wyzwanie wynika z samej daty (`challengeFor('RRRR-MM-DD')`), bez serwera. Dzień liczy się w lokalnym czasie telefonu.
-- Wyzwania są tylko z klasycznego sudoku (decyzja teresza): Logika i Odkryte pola na zmianę, dzień po dniu.
+- Wyzwania są tylko z klasycznego sudoku (decyzja teresza): Logika i Standard na zmianę, dzień po dniu.
 - Trudność rośnie w ciągu tygodnia jak w gazecie: poniedziałek łagodnie, sobota najciężej, niedziela trochę luźniej (plus odrobina losowości).
 - Mniej więcej co drugi dzień jest haczyk: bez podpowiedzi, jeden błąd i koniec (liczy błędy nawet z wyłączonym sprawdzaniem) albo bez notatek.
 - Kalendarz zaczyna się 1 października 2026 (`DAILY_START`).

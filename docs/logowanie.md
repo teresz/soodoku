@@ -34,7 +34,7 @@ Bez kroku 2 Supabase przy zakładaniu konta próbuje wysłać mail z linkiem, a 
 
 ## Ranking globalny (dla wszystkich)
 
-- W Statystykach na górze: top 10 dla każdego trybu i poziomu (Logika, Odkryte pola, Saperdoku, Oblężenie po czasie, Tetroku po punktach), plus „Twoje miejsce”, gdy gracz jest poza dziesiątką. Sabotaż i wyzwania dnia są poza rankingiem.
+- W Statystykach na górze: top 10 dla każdego trybu i poziomu (Logika, Standard, Saperdoku, Oblężenie po czasie, Tetroku po punktach), plus „Twoje miejsce”, gdy gracz jest poza dziesiątką. Sabotaż i wyzwania dnia są poza rankingiem.
 - Liczy się tylko wygrana bez „Graj dalej bez limitu”. Każdy gracz ma w rankingu jeden wiersz na tryb i poziom: swój najlepszy wynik.
 - Gracz z kontem widnieje pod częścią maila przed @ (np. `jan.kowalski`), bez konta jako „Gość” / „Guest” w języku oglądającego. Gość jest rozpoznawany po losowym id przeglądarki (tym samym co w liczniku wejść).
 - Po wygranej ekran końca dostaje plakietkę z miejscem na świecie. Wynik, który nie doszedł (brak sieci), czeka w telefonie i leci przy następnym wejściu.
