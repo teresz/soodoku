@@ -40,10 +40,13 @@ export const formatTime = (ms: number) => {
   return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 };
 
+/** Na start gry zaznaczamy pierwsze pole z cyfrą startową (od lewej, od góry), a nie lewy górny róg, który bywa pusty. */
+const firstGiven = (g: Game) => g.state.puzzle.findIndex((v) => v !== 0);
+
 export function startApp(initial: SavedGame | null) {
   const saved = initial ?? loadGame();
   let game = new Game(saved ?? Game.blank());
-  let selected: number | null = game.state.tetroku ? -1 : game.state.values.findIndex((v) => !v);
+  let selected: number | null = game.state.tetroku ? -1 : firstGiven(game);
   if (selected < 0) selected = null;
   let notesMode = false;
   let flagMode = false; // Saperdoku: tap w pole stawia flagę
@@ -429,7 +432,7 @@ export function startApp(initial: SavedGame | null) {
     closeSheets();
     game = Game.create(modeId, difficulty, seed);
     applySettings();
-    selected = game.state.values.findIndex((v) => !v);
+    selected = firstGiven(game);
     notesMode = false;
     flagMode = false;
     paused = false;
@@ -478,7 +481,7 @@ export function startApp(initial: SavedGame | null) {
     game = next;
     applySettings();
     // W Tetroku nic nie zaznaczamy na start: plansza ma być czysta pod klocki.
-    selected = game.state.tetroku ? null : game.state.values.findIndex((v) => !v);
+    selected = game.state.tetroku ? null : firstGiven(game);
     if (selected !== null && selected < 0) selected = null;
     notesMode = false;
     flagMode = false;
@@ -501,7 +504,7 @@ export function startApp(initial: SavedGame | null) {
       sab.leave();
       game = new Game(loadGame() ?? Game.blank());
       applySettings();
-      selected = game.state.tetroku ? null : game.state.values.findIndex((v) => !v);
+      selected = game.state.tetroku ? null : firstGiven(game);
       if (selected !== null && selected < 0) selected = null;
     }
     screen = next;
