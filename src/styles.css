@@ -17,8 +17,11 @@
   --glow-b: #00d1ff;
   --glow-alpha: .28;
 
-  --f-display: "Unbounded", "Arial Black", system-ui, sans-serif;
-  --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Napisy, menu i arkusze: Space Mono. Plansza, klocki i klawisze cyfr zostają przy Unbounded + Manrope (niżej, .board-wrap). */
+  --f-display: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-body: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-board-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-board-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --ease: cubic-bezier(.2, .9, .25, 1.15);
 }
 @media (prefers-color-scheme: dark) {
@@ -41,7 +44,7 @@
 html, body { min-height: 100%; }
 html, body { overflow-x: clip; }
 body {
-  margin: 0; font-family: var(--f-body); font-size: 15px; color: var(--text); background: var(--bg);
+  margin: 0; font-family: var(--f-body); font-size: 13px; color: var(--text); background: var(--bg);
   -webkit-tap-highlight-color: transparent; overflow-x: hidden; transition: background-color .4s;
 }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
@@ -89,7 +92,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .mark i { width: 6px; height: 6px; border-radius: 2px; background: var(--text); opacity: .85; }
 .mark i.on { background: var(--accent); opacity: 1; animation: blink 3.2s var(--ease) infinite; }
 @keyframes blink { 0%, 70%, 100% { transform: scale(1); } 80% { transform: scale(1.5) rotate(45deg); } }
-.logo { font-family: var(--f-display); font-weight: 500; font-size: 22px; letter-spacing: -.03em; margin: 0; line-height: 1; }
+.logo { font-family: var(--f-display); font-weight: 700; font-size: 22px; letter-spacing: -.04em; margin: 0; line-height: 1; }
 .top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .icon-btn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); transition: background-color .2s, color .2s; }
 .icon-btn:hover:not(:disabled) { background: var(--surface); color: var(--text); }
@@ -124,6 +127,9 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pause { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--cell); }
 .pause-icon { width: 8px; height: 9px; border-left: 2.5px solid var(--text); border-right: 2.5px solid var(--text); }
 .pause[aria-pressed="true"] .pause-icon { border: 0; width: 0; height: 0; border-left: 8px solid var(--text); border-top: 5px solid transparent; border-bottom: 5px solid transparent; margin-left: 2px; }
+
+/* Plansza i klawisze cyfr mają własną czcionkę, niezależną od reszty interfejsu. */
+.board-wrap, .keypad, .tet-piece { --f-display: var(--f-board-display); --f-body: var(--f-board-body); font-family: var(--f-board-body); }
 
 /* Plansza: 9 kafli po 9 pól */
 .board-wrap { position: relative; container-type: inline-size; isolation: isolate; }
@@ -314,7 +320,7 @@ html:has(.overlay:not([hidden])) { overflow: hidden; }
   display: flex; flex-direction: column; gap: 14px; min-height: 100%;
 }
 .hero { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding-block: 54px 8px; }
-.hero-title { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: clamp(48px, 14vw, 66px); letter-spacing: -.06em; line-height: .9; }
+.hero-title { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(44px, 13vw, 60px); letter-spacing: -.06em; line-height: .9; }
 .hero-title::after { content: "."; color: var(--accent); }
 .hero-sub { margin: 0; font-size: 14px; color: var(--muted); font-weight: 600; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -348,11 +354,11 @@ html:has(.overlay:not([hidden])) { overflow: hidden; }
   content: ""; position: absolute; top: 12px; left: 14px; width: 26px; height: 26px; background: var(--accent);
   -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat;
 }
-.mc-top strong { font-family: var(--f-display); font-weight: 500; font-size: 15px; letter-spacing: -.03em; line-height: 1.15; }
+.mc-top strong { font-family: var(--f-display); font-weight: 700; font-size: 14px; letter-spacing: -.04em; line-height: 1.15; }
 .mc-top em, .mc-desc, .mc-levels { display: none; }
 .mode-card:first-child { grid-row: span 2; background: var(--text); color: var(--bg); }
 .mode-card:first-child::before { width: 34px; height: 34px; background: var(--bg); }
-.mode-card:first-child .mc-top strong { font-size: 24px; }
+.mode-card:first-child .mc-top strong { font-size: 22px; }
 .mode-card:first-child .mc-desc { display: block; margin-top: 4px; font-size: 12px; line-height: 1.35; color: inherit; opacity: .7; }
 .mode-card:nth-child(3) { background: var(--accent); color: var(--on-accent); }
 .mode-card:nth-child(3)::before { background: var(--on-accent); }
