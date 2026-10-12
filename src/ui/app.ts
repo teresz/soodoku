@@ -249,6 +249,7 @@ export function startApp(initial: SavedGame | null) {
     hintBtn.disabled = game.hintsLeft === 0 || s.status !== 'playing' || isSab();
     hintBtn.dataset.left = String(game.hintsLeft);
     hintBtn.title = t('tool.hintsLeft', { n: game.hintsLeft, max: HINT_LIMIT });
+    $('tool-pencil').title = t('tool.pencilTitle');
     renderTime();
     $('paused').hidden = !paused;
     $('btn-pause').setAttribute('aria-pressed', String(paused));
@@ -267,7 +268,11 @@ export function startApp(initial: SavedGame | null) {
     const sp = game.state.saper;
     $('chip-mines').hidden = !sp;
     $('tool-flag').hidden = !sp;
-    $('tools').classList.toggle('five', !!sp);
+    const pencil = !game.state.tetroku && !isSab() && game.notesAllowed;
+    $('tool-pencil').hidden = !pencil;
+    const n = 3 + Number(pencil) + Number(!!sp) + Number(game.notesAllowed);
+    $('tools').classList.toggle('five', n === 5);
+    $('tools').classList.toggle('six', n === 6);
     const list = $('mine-list');
     list.hidden = !sp?.showList;
     if (!sp) return;
@@ -407,6 +412,16 @@ export function startApp(initial: SavedGame | null) {
     if (!h) return;
     selected = h.index;
     handleResult(h.index, h.result);
+  }
+
+  function quickPencil() {
+    if (paused || filling || isSab() || game.state.tetroku) return;
+    if (!game.fillNotes()) return;
+    play('note');
+    // Notatki wskakują falą od lewego górnego rogu.
+    for (let j = 0; j < CELLS; j++) if (!game.state.values[j] && !game.isGiven(j)) animate(j, 'pencil', (rowOf(j) + colOf(j)) * 18, 300);
+    persist();
+    render();
   }
 
   function toggleNotes() { if (!game.notesAllowed) return; notesMode = !notesMode; if (notesMode) flagMode = false; render(); }
@@ -846,6 +861,7 @@ export function startApp(initial: SavedGame | null) {
   $('tool-notes').addEventListener('click', toggleNotes);
   $('tool-hint').addEventListener('click', hint);
   $('btn-autofill').addEventListener('click', autofill);
+  $('tool-pencil').addEventListener('click', quickPencil);
   $('btn-autofill-skip').addEventListener('click', () => { autofillSkipped = true; render(); });
   $('tool-flag').addEventListener('click', toggleFlagMode);
   $('btn-pause').addEventListener('click', () => setPaused(!paused));

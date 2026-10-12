@@ -45,9 +45,9 @@ Generator zdejmuje cyfry symetrycznie, pilnując jednego rozwiązania, a potem o
 - Łatwy / Średni: wystarczą pojedynczy i ukryci kandydaci (38 / 31 cyfr na start).
 - Trudny: potrzeba zablokowanych kandydatów lub nagich par.
 - Ekspert: proste techniki nie wystarczają, ≤25 cyfr.
-- Niemożliwy (`generateImpossible`): plansza minimalna, jednoznaczna, rozwiązywalna bez zgadywania mocniejszym solverem z `src/core/deep.ts` (trójki, ukryte pary, X-Wing/Swordfish/Jellyfish, XY-/XYZ-Wing, kolorowanie, wymuszenia), ale wymaga co najmniej 3 wymuszeń. `logic.ts` zostaje bez zmian, bo z niego liczą się stare poziomy i wyzwania dnia.
+- Niemożliwy (`generateHardest` w `src/core/hardest.ts`, wspólny z trybem Standard): bank najtrudniejszych znanych sudoku (AI Escargot, Everest, Easter Monster i inne z list „top”), przebierany z seeda (zamiana cyfr, wierszy w pasach, pasów, kolumn, stosów, transpozycja). Każde ma jedno rozwiązanie, a mocny solver z `src/core/deep.ts` (trójki, ryby, skrzydła, kolorowanie, wymuszenia) na nich utyka, co pilnuje `tests/impossible.test.ts`. `logic.ts` zostaje bez zmian, bo z niego liczą się stare poziomy i wyzwania dnia.
 
-Tryb „Standard” (`src/modes/clues.ts`, `generateByClues`) liczy trudność tylko po liczbie cyfr na start: 50, 42, 36, 30, 26, 23, a Niemożliwy 22 (`generateImpossibleClues`, z preferencją plansz, których nie da się zrobić samymi pojedynczymi). Cyfry zdejmowane są bez symetrii, plansza zawsze ma jedno rozwiązanie.
+Tryb „Standard” (`src/modes/clues.ts`, `generateByClues`) liczy trudność tylko po liczbie cyfr na start: 50, 42, 36, 30, 26, 23, a na końcu Niemożliwy z Logiki. Cyfry zdejmowane są bez symetrii, plansza zawsze ma jedno rozwiązanie.
 
 ## Autouzupełnianie
 
