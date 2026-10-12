@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { carveFree, fullGrid, generateImpossible, generateImpossibleClues, IMPOSSIBLE_CLUES } from '../src/core/generator';
+import { carveFree, fullGrid } from '../src/core/generator';
+import { HARDEST, generateHardest } from '../src/core/hardest';
 import { rateDeep } from '../src/core/deep';
-import { rate } from '../src/core/logic';
+import { conflicts, fromString } from '../src/core/board';
 import { countSolutions } from '../src/core/solver';
 import { makeRng } from '../src/core/rng';
 
@@ -16,28 +17,24 @@ describe('Niemożliwy', () => {
     }
   });
 
-  it('Logika: plansza jednoznaczna, nie do zrobienia prostymi technikami, ale do zrobienia logiką', () => {
-    for (const seed of [1, 2, 3, 4, 5]) {
-      const p = generateImpossible(seed);
+  it('każda plansza z banku ma jedno rozwiązanie i jest poza zasięgiem mocnego solvera', () => {
+    for (const s of HARDEST) {
+      const g = fromString(s);
+      expect(s).toHaveLength(81);
+      expect(countSolutions(g, 2)).toBe(1);
+      expect(rateDeep(g).solved).toBe(false);
+    }
+  });
+
+  it('przebrana plansza: jednoznaczna, dalej za trudna dla solvera, ta sama z tego samego seeda', () => {
+    for (const seed of [1, 2, 3, 42, 999]) {
+      const p = generateHardest(seed);
       expect(countSolutions(p.puzzle, 2)).toBe(1);
+      expect(conflicts(p.solution).size).toBe(0);
       expect(p.puzzle.every((v, i) => !v || v === p.solution[i])).toBe(true);
-      expect(rate(p.puzzle).solved).toBe(false);
-      const r = rateDeep(p.puzzle);
-      expect(r.solved).toBe(true);
-      expect(r.forced).toBeGreaterThanOrEqual(3);
+      expect(rateDeep(p.puzzle).solved).toBe(false);
+      expect(generateHardest(seed).puzzle).toEqual(p.puzzle);
     }
-  });
-
-  it('Logika: ta sama plansza z tego samego seeda', () => {
-    expect(generateImpossible(77).puzzle).toEqual(generateImpossible(77).puzzle);
-  });
-
-  it(`Standard: ${IMPOSSIBLE_CLUES} cyfry na start, jednoznaczna i do zrobienia logiką`, () => {
-    for (const seed of [1, 2, 3]) {
-      const p = generateImpossibleClues(seed);
-      expect(p.puzzle.filter(Boolean).length).toBe(IMPOSSIBLE_CLUES);
-      expect(countSolutions(p.puzzle, 2)).toBe(1);
-      expect(rateDeep(p.puzzle).solved).toBe(true);
-    }
+    expect(generateHardest(1).puzzle).not.toEqual(generateHardest(2).puzzle);
   });
 });

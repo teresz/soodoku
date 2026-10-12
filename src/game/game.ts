@@ -1,4 +1,4 @@
-import { CELLS, Grid, PEERS, UNITS, UNITS_OF, bit } from '../core/board';
+import { CELLS, Grid, PEERS, UNITS, UNITS_OF, bit, candidates } from '../core/board';
 import { findEasyMove } from '../core/logic';
 import { getMode } from '../modes';
 import { deduce } from '../modes/saperdoku/engine';
@@ -170,6 +170,17 @@ export class Game {
     const won = s.values.every((_, j) => this.isDone(j));
     if (won) s.status = 'won';
     return { changed: true, completedUnits, won };
+  }
+
+  /** Szybki ołówek: w każdym pustym polu notatki = cyfry, których nie ma jeszcze w wierszu, kolumnie i kwadracie. */
+  fillNotes(): boolean {
+    const s = this.state;
+    if (!this.playable || !this.notesAllowed || s.tetroku) return false;
+    const next = s.notes.map((m, i) => (this.isGiven(i) || s.values[i] || this.isFlagged(i) ? m : candidates(s.values, i)));
+    if (next.every((m, i) => m === s.notes[i])) return false;
+    this.snapshot();
+    s.notes = next;
+    return true;
   }
 
   erase(i: number): MoveResult {

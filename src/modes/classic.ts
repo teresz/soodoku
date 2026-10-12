@@ -1,4 +1,5 @@
-import { Difficulty, generate, generateImpossible } from '../core/generator';
+import { Difficulty, generate } from '../core/generator';
+import { generateHardest } from '../core/hardest';
 import { t } from '../i18n';
 import { GameMode } from './types';
 
@@ -13,5 +14,5 @@ export const classic: GameMode = {
   get difficulties() {
     return (['easy', 'medium', 'hard', 'expert', 'impossible'] as const).map((id) => ({ id, label: t(`lvl.${id}`), hint: t(`classic.${id}`) }));
   },
-  createPuzzle: (difficulty, seed) => (difficulty === 'impossible' ? generateImpossible(seed) : generate(difficulty as Difficulty, seed)),
+  createPuzzle: (difficulty, seed) => (difficulty === 'impossible' ? generateHardest(seed) : generate(difficulty as Difficulty, seed)),
 };

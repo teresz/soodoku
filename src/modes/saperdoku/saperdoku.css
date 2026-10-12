@@ -26,6 +26,7 @@
 @keyframes blast { 0% { transform: scale(1); } 25% { transform: scale(1.35) rotate(-6deg); } 50% { transform: scale(.9) rotate(4deg); } 100% { transform: scale(1); } }
 
 .tools.five { grid-template-columns: repeat(5, 1fr); }
+.tools.six { grid-template-columns: repeat(6, 1fr); }
 
 .mine-list { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; font-weight: 600; color: var(--muted); font-size: 13px; }
 .mine-list b {
