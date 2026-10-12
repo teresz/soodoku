@@ -14,9 +14,14 @@
 .cell.sel .mc { color: var(--on-accent) !important; opacity: .9; }
 
 .cell.flag { background: color-mix(in srgb, var(--accent) 16%, var(--cell)); }
-.cell.flag .val::before { content: "🚩"; font-size: 4.4cqw; }
+/* Flaga jako SVG, nie emoji: emoji na każdym telefonie siedzi inaczej względem linii pisma, a ten rysunek jest
+   wyśrodkowany optycznie (maszt + proporczyk razem trzymają środek pola). */
+.cell.flag .val::before {
+  content: ""; display: block; width: 6.6cqw; height: 6.6cqw;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6.4 3.2h1.6v17.6H6.4z' fill='%236b7280'/%3E%3Cpath d='M8 3.2 18.6 7.6 8 12z' fill='%23e5383b'/%3E%3Cellipse cx='7.2' cy='20.6' rx='3.4' ry='1.2' fill='%236b7280'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 .cell.boom { background: color-mix(in srgb, var(--danger) 28%, var(--cell)); }
-.cell.boom .val::before { content: "💥"; }
+.cell.boom .val::before { content: "💥"; width: auto; height: auto; background: none; line-height: 1; }
 .motion .cell.blast { animation: blast .6s var(--ease); z-index: 3; }
 @keyframes blast { 0% { transform: scale(1); } 25% { transform: scale(1.35) rotate(-6deg); } 50% { transform: scale(.9) rotate(4deg); } 100% { transform: scale(1); } }
 

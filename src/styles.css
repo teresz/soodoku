@@ -172,7 +172,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .blob, .backlit::before, .mark i.on, .cell, .cell .val { animation: none !important; } }
 
 .paused-cover {
-  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  position: absolute; inset: 0; z-index: 7; /* nad zaznaczonym polem (z-index 2) i efektami trybów na planszy */ display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
   background: color-mix(in srgb, var(--surface) 70%, transparent); backdrop-filter: blur(22px); border-radius: 3.4cqw;
 }
 .paused-cover p { margin: 0; font-family: var(--f-display); font-size: 9cqw; font-weight: 300; letter-spacing: -.04em; }
