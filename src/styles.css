@@ -43,6 +43,8 @@
 [hidden] { display: none !important; }
 html, body { min-height: 100%; }
 html, body { overflow-x: clip; }
+/* Bez przybliżania: dwuklik nie zoomuje (manipulation), pinch blokuje meta viewport + noZoom() w main.ts dla iOS. */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
   margin: 0; font-family: var(--f-body); font-size: 13px; color: var(--text); background: var(--bg);
   -webkit-tap-highlight-color: transparent; overflow-x: hidden; transition: background-color .4s;

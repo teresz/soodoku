@@ -1,7 +1,7 @@
 // Service worker soodoku: szybki start przypiętej apki.
 // Strona i pliki z tej domeny: od razu z pamięci, w tle dociąga świeżą wersję (nowy deploy widać przy następnym uruchomieniu).
 // Czcionki Google: z pamięci, bo się nie zmieniają. Supabase, reklamy i reszta obcych adresów idą prosto do sieci.
-const CACHE = 'soodoku-v1';
+const CACHE = 'soodoku-v2';
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', (e) => {
