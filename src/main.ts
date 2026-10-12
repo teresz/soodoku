@@ -15,3 +15,12 @@ const start = (data: { game?: SavedGame } = {}) => {
 
 if (hot?.ready) hot.ready(start);
 else start(hot?.data ?? {});
+
+// Motyw już nałożony: od teraz zmiany tła mogą płynnie przenikać.
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.add('ready')));
+
+// Service worker: przypięta apka startuje z pamięci telefonu zamiast ściągać całą stronę i czcionki przy każdym uruchomieniu.
+// Nie w podglądzie Artifact (ramka) ani na localhost w trybie dev.
+if ('serviceWorker' in navigator && location.protocol === 'https:' && window.top === window && !import.meta.env.DEV) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
