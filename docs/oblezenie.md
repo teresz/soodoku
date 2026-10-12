@@ -9,7 +9,7 @@ Wybrany wariant: „E. Oblężenie kwadratów” (teresz odrzucił: linie frontu
 - Plansza sudoku z klasycznego generatora (łatwa / średnia / trudna), więc rozwiązywalna samą logiką.
 - 9 kwadratów 3x3 to 9 zamków. Każdy ma mur (3 punkty, na Ekspercie 2), widoczny jako kreski na dolnej krawędzi kwadratu.
 - Wrogowie (potwory) przychodzą co kilkanaście sekund i siadają na górnej krawędzi kwadratu, który szturmują. Pierścień wokół potwora to pasek szturmu: jak się zapełni, potwór wali w mur i znika.
-- **Dobra cyfra** w szturmowanym kwadracie = strzał w potwora, któremu najmniej zostało.
+- **Dobra cyfra** w szturmowanym kwadracie = strzał w potwora, któremu najmniej zostało. Każde pole strzela tylko raz na grę: skasowanie dobrej cyfry i ponowny wpis nie strzela. Tak samo laser i twierdza: każdy wiersz, kolumna i kwadrat odpala raz.
 - Potwory (decyzja teresza 2026-10-09: mocniejszy bije mocniej, ale ładuje dłużej):
 
   | Potwór | Życia | Ładowanie szturmu | Zbija muru | Od poziomu |
