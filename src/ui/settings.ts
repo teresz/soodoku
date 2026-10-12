@@ -7,6 +7,7 @@ export interface Settings {
   highlightPeers: boolean; // wiersz, kolumna, kwadrat
   highlightSame: boolean; // te same cyfry
   autoClearNotes: boolean; // wpisana cyfra czyści notatki sąsiadów
+  autofill: boolean; // przycisk „Autouzupełnij” przy ostatnich polach
   showTimer: boolean;
   motion: boolean; // animacje i żywe tło
   sound: boolean; // ciche dźwięki gry
@@ -21,6 +22,7 @@ export const DEFAULT_SETTINGS: Settings = {
   highlightPeers: true,
   highlightSame: true,
   autoClearNotes: true,
+  autofill: true,
   showTimer: true,
   motion: true,
   sound: true,

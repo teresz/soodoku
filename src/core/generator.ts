@@ -1,4 +1,5 @@
 import { CELLS, Grid } from './board';
+import { Tier, rateDeep } from './deep';
 import { Technique, rate } from './logic';
 import { Rng, makeRng, shuffle } from './rng';
 import { countSolutions, search } from './solver';
@@ -103,6 +104,56 @@ export function generateByClues(clues: number, seed: number, maxAttempts = 60): 
     const result = { puzzle, solution, difficulty: `c${clues}`, seed };
     if (n === clues) return result;
     if (n < bestClues) { best = result; bestClues = n; }
+  }
+  return best!;
+}
+
+/**
+ * Poziom Niemożliwy (Logika): plansza minimalna (żadnej cyfry nie da się już zdjąć), jednoznaczna
+ * i rozwiązywalna bez zgadywania, ale tylko z kilkoma wymuszeniami (najcięższa technika w `deep.ts`).
+ * Wszystko z seeda, bez zegara, żeby ta sama plansza wychodziła na każdym urządzeniu.
+ */
+export function generateImpossible(seed: number, maxAttempts = 150): Puzzle {
+  const rng = makeRng(seed);
+  let best: Puzzle | null = null;
+  let bestScore = -Infinity;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const solution = fullGrid(rng);
+    const puzzle = carveFree(solution, 17, rng);
+    const r = rateDeep(puzzle);
+    if (!r.solved) continue;
+    const clues = puzzle.filter(Boolean).length;
+    const result = { puzzle, solution, difficulty: 'impossible', seed };
+    if (r.forced >= 3 && clues <= 25) return result;
+    const score = r.forced * 100 + r.advanced * 10 - clues;
+    if (score > bestScore) { best = result; bestScore = score; }
+  }
+  return best ?? generateByClues(22, seed);
+}
+
+/**
+ * Poziom Niemożliwy (Standard): 22 cyfry na start, o jedną mniej niż Mistrz, i do tego plansza, której nie da się
+ * zrobić samymi pojedynczymi (trzeba co najmniej ukrytych par/trójek, często ryb i wymuszeń). 22-cyfrowe trafiają się
+ * rzadko, więc po 60 próbach bierzemy najlepszą znalezioną, żeby telefon nie mielił w nieskończoność.
+ */
+export const IMPOSSIBLE_CLUES = 22;
+export function generateImpossibleClues(seed: number, maxAttempts = 200): Puzzle {
+  const rng = makeRng(seed);
+  let best: Puzzle | null = null;
+  let bestScore = -Infinity;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const solution = fullGrid(rng);
+    const puzzle = carveFree(solution, IMPOSSIBLE_CLUES, rng);
+    const clues = puzzle.filter(Boolean).length;
+    const result = { puzzle, solution, difficulty: 'impossible', seed };
+    let score = -clues * 100;
+    if (clues <= IMPOSSIBLE_CLUES) {
+      const r = rateDeep(puzzle);
+      if (r.solved && r.hardest >= Tier.Subsets) return result;
+      if (r.solved) score = r.hardest;
+    }
+    if (score > bestScore) { best = result; bestScore = score; }
+    if (attempt >= 60 && bestScore >= Tier.Singles) return best!;
   }
   return best!;
 }
