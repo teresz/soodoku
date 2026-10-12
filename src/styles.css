@@ -215,6 +215,9 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* Arkusze */
 .overlay { position: fixed; inset: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(6px); display: flex; align-items: flex-end; justify-content: center; padding: 12px; padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 600px) { .overlay { align-items: center; } }
+/* Otwarty arkusz trzyma przewijanie u siebie: strona pod spodem stoi (na telefonie przewijało się menu zamiast Ustawień). */
+html:has(.overlay:not([hidden])) { overflow: hidden; }
+.overlay, .sheet { overscroll-behavior: contain; }
 .sheet { width: 100%; max-width: 440px; max-height: 100%; overflow: auto; background: var(--surface); border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .45); animation: rise .35s var(--ease); }
 @keyframes rise { from { transform: translateY(24px) scale(.98); opacity: 0; } }
 /* X w rogu każdego arkusza. Przyklejony do góry, więc zostaje pod palcem także w długich arkuszach (Ustawienia, Jak grać). */
