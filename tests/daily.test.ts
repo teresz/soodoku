@@ -66,8 +66,8 @@ describe('wyzwanie dnia', () => {
       g.state.daily = { day: ch.day, mod: ch.mod };
       for (const lang of ['pl', 'en'] as const) {
         setLang(lang);
-        const note = buildNote(ch, g.state);
-        expect(note.length).toBeGreaterThanOrEqual(3);
+        const note = buildNote(ch);
+        expect(note.length).toBe(ch.mod === 'none' ? 1 : 2);
         for (const line of note) expect(line, `${ch.day}/${lang}`).not.toMatch(/daily\.|\{\w+\}/);
         if (lang === 'pl') seen.add(note.join(' '));
       }

@@ -12,7 +12,7 @@ Codziennie jedna plansza, ta sama dla wszystkich graczy. Kod: `src/daily/` (`dai
 
 ## Notatka „Dlaczego to wyzwanie”
 
-Składana z kawałków: zdanie o dniu tygodnia, opis trybu i poziomu z liczbą cyfr na start, technika potrzebna do rozwiązania (z oceny solvera) i haczyk. Warianty zdań wybiera liczba dnia, więc notatki różnią się z dnia na dzień.
+Krótka: zdanie o dniu tygodnia i haczyk (jeśli tego dnia jest). Warianty zdań wybiera liczba dnia, więc notatki różnią się z dnia na dzień.
 
 ## Postęp i streak
 
